@@ -123,7 +123,7 @@
 
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Authentication Screen Toolbar (Only visible on login/signup page) -->
+    <!-- Authentication Screen Toolbar -->
     <div id="auth-toolbar" class="fixed top-4 right-4 z-50 flex items-center space-x-2">
         <button onclick="toggleLanguage()" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5">
             <i class="fa-solid fa-globe text-sky-600"></i>
@@ -243,6 +243,9 @@
                     </button>
                     <button onclick="switchSection('profile'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                         <i class="fa-solid fa-user text-sky-600 w-5"></i><span data-i18n="navProfile">প্রোফাইল</span>
+                    </button>
+                    <button id="admin-menu-btn" onclick="switchSection('admin'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-3 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition">
+                        <i class="fa-solid fa-user-shield w-5"></i><span data-i18n="navAdmin">এডমিন প্যানেল</span>
                     </button>
                     <button onclick="refreshCloudData(); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-3 text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                         <i class="fa-solid fa-rotate w-5"></i><span data-i18n="refreshBtn">রিফ্রেশ</span>
@@ -452,6 +455,55 @@
                 </div>
             </section>
 
+            <!-- ADMIN DASHBOARD SECTION -->
+            <section id="section-admin" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg font-bold">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white">এডমিন ড্যাশবোর্ড (Admin Panel)</h2>
+                                <p class="text-xs text-slate-500">আপনার তৈরি অ্যাকাউন্টের তথ্যাদি ও ব্যবহারকারীদের তালিকা</p>
+                            </div>
+                        </div>
+                        <button onclick="loadAdminUserData()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold shadow transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>রিফ্রেশ তথ্য</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="p-4 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl">
+                            <span class="text-xs font-bold text-purple-700 dark:text-purple-300">মোট নিবন্ধিত ব্যবহারকারী</span>
+                            <h3 class="text-3xl font-extrabold text-purple-900 dark:text-purple-100 mt-1" id="admin-total-users">০</h3>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">সকল ব্যবহারকারীদের তালিকা</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 uppercase font-semibold bg-slate-50 dark:bg-slate-900">
+                                        <th class="py-2.5 px-3">ব্যবহারকারীর নাম</th>
+                                        <th class="py-2.5 px-3">মোবাইল / ইমেইল</th>
+                                        <th class="py-2.5 px-3">ঠিকানা</th>
+                                        <th class="py-2.5 px-3 text-right">মোট লেনদেন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                    <tr>
+                                        <td colspan="4" class="py-6 text-center text-slate-400">তথ্য লোড করা হচ্ছে...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- PROFILE SECTION -->
             <section id="section-profile" class="space-y-6 hidden">
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 max-w-2xl mx-auto space-y-6">
@@ -637,6 +689,7 @@
                 navTransactions: 'লেনদেন',
                 navCategories: 'খাতসমূহ',
                 navProfile: 'প্রোফাইল',
+                navAdmin: 'এডমিন প্যানেল',
                 printReportBtn: 'প্রিন্ট',
                 refreshBtn: 'রিফ্রেশ',
                 logout: 'লগআউট',
@@ -735,6 +788,7 @@
                 navTransactions: 'Transactions',
                 navCategories: 'Categories',
                 navProfile: 'Profile',
+                navAdmin: 'Admin Panel',
                 printReportBtn: 'Print',
                 refreshBtn: 'Refresh',
                 logout: 'Logout',
@@ -1067,14 +1121,51 @@
         }
 
         function switchSection(sectionId) {
-            ['dashboard', 'transactions', 'categories', 'profile'].forEach(sec => {
+            ['dashboard', 'transactions', 'categories', 'profile', 'admin'].forEach(sec => {
                 const el = document.getElementById('section-' + sec);
-                if (sec === sectionId) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
+                if (el) {
+                    if (sec === sectionId) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
                 }
             });
+            if (sectionId === 'admin') loadAdminUserData();
+        }
+
+        async function loadAdminUserData() {
+            const tbody = document.getElementById('admin-users-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-400">তথ্য লোড করা হচ্ছে...</td></tr>';
+            
+            try {
+                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users'));
+                if (!snapshot.exists()) {
+                    document.getElementById('admin-total-users').innerText = '0';
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-400">কোনো ব্যবহারকারীর তথ্য পাওয়া যায়নি</td></tr>';
+                    return;
+                }
+
+                const usersData = snapshot.val();
+                const usersList = Object.values(usersData);
+                document.getElementById('admin-total-users').innerText = usersList.length.toLocaleString();
+
+                tbody.innerHTML = '';
+                usersList.forEach(u => {
+                    const txCount = u.transactions ? u.transactions.length : 0;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/30 transition";
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-100">${u.name || 'অজ্ঞাত'}</td>
+                        <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 font-mono">${u.identifier || '-'}</td>
+                        <td class="py-2.5 px-3 text-slate-500">${u.address || '-'}</td>
+                        <td class="py-2.5 px-3 text-right font-bold text-sky-600 dark:text-sky-400">${txCount} টি</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-rose-500">তথ্য লোড করতে সমস্যা হয়েছে</td></tr>';
+            }
         }
 
         function setTransactionType(type) {
