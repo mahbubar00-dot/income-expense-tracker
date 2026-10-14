@@ -35,13 +35,38 @@
     <!-- Google Fonts: Hind Siliguri (Bengali) & Inter (English) -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Firebase SDK (CDN) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDd0POoFX067ZihlROIlNnSxExJdZj2bzI",
+            authDomain: "income-expense-tracker-bab65.firebaseapp.com",
+            databaseURL: "https://income-expense-tracker-bab65-default-rtdb.firebaseio.com",
+            projectId: "income-expense-tracker-bab65",
+            storageBucket: "income-expense-tracker-bab65.firebasestorage.app",
+            messagingSenderId: "179518479679",
+            appId: "1:179518479679:web:845e07cab7ac0b6682078a",
+            measurementId: "G-BR16PC5YW2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Make database functions globally accessible
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbGet = get;
+        window.dbChild = child;
+    </script>
+
     <style>
         body {
             font-family: 'Hind Siliguri', 'Inter', sans-serif;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
-
-        /* Clean custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -53,8 +78,6 @@
             background: rgba(156, 163, 175, 0.4);
             border-radius: 9999px;
         }
-
-        /* Print Specific Styling */
         @media print {
             body {
                 background: #ffffff !important;
@@ -98,10 +121,8 @@
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white">
 
-    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Floating Toolbar ONLY for Authentication Screen -->
     <div id="auth-toolbar" class="fixed top-4 right-4 z-50 flex items-center space-x-2">
         <button onclick="toggleLanguage()" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5">
             <i class="fa-solid fa-globe text-sky-600"></i>
@@ -113,11 +134,10 @@
         </button>
     </div>
 
-    <!-- Authentication Screen (Login & Signup) -->
+    <!-- Authentication Screen -->
     <div id="auth-container" class="flex-grow flex items-center justify-center p-4 sm:p-6 my-auto">
         <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 transition-all">
             
-            <!-- App Title Header -->
             <div class="text-center mb-6">
                 <div class="w-14 h-14 bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-sm">
                     <i class="fa-solid fa-wallet"></i>
@@ -126,7 +146,6 @@
                 <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="appSubtitle">সহজ ও নিরাপদ উপায়ে দৈনন্দিন হিসাব রাখুন</p>
             </div>
 
-            <!-- Tab Switcher -->
             <div class="flex bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl mb-6 border border-slate-200 dark:border-slate-600">
                 <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm transition" data-i18n="login">লগইন</button>
                 <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" data-i18n="signup">সাইন আপ</button>
@@ -189,11 +208,9 @@
     <!-- Main App Interface Container -->
     <div id="app-container" class="hidden flex-grow flex flex-col">
         
-        <!-- Header Bar (Unified Actions Bar: Controls exist HERE ONLY) -->
         <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm transition no-print">
             <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
                 
-                <!-- Logo & Current User Profile Quick Link -->
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="switchSection('profile')">
                     <img id="nav-user-avatar" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-9 h-9 rounded-full object-cover border border-slate-300 dark:border-slate-600 shadow-sm">
                     <div>
@@ -202,7 +219,6 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs -->
                 <nav class="hidden md:flex items-center space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
                     <button onclick="switchSection('dashboard')" id="nav-dashboard" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm transition">
                         <i class="fa-solid fa-chart-pie mr-1"></i><span data-i18n="navDashboard">ড্যাশবোর্ড</span>
@@ -218,34 +234,28 @@
                     </button>
                 </nav>
 
-                <!-- Single Action Controls Bar: Print, Language Switcher, Theme Switcher, Logout -->
                 <div class="flex items-center space-x-2">
-                    <!-- Print Button (Only ONCE in header) -->
                     <button onclick="openPrintModal()" class="px-3 py-1.5 text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow transition flex items-center space-x-1">
                         <i class="fa-solid fa-print"></i>
                         <span class="hidden sm:inline" data-i18n="printReportBtn">প্রিন্ট করুন</span>
                     </button>
 
-                    <!-- Language Switcher (Only ONCE in header) -->
                     <button onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition flex items-center space-x-1" title="Language Switcher">
                         <i class="fa-solid fa-globe text-sky-600"></i>
                         <span id="app-lang-btn-text">English</span>
                     </button>
 
-                    <!-- Theme Switcher (Only ONCE in header) -->
                     <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition" title="Theme Switcher">
                         <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
                         <i class="fa-solid fa-moon inline dark:hidden text-slate-600"></i>
                     </button>
                     
-                    <!-- Logout -->
                     <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition border border-rose-200 dark:border-rose-900/50">
                         <i class="fa-solid fa-right-from-bracket mr-1"></i><span data-i18n="logout">লগআউট</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Mobile Navigation Bar -->
             <div class="md:hidden flex border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                 <button onclick="switchSection('dashboard')" id="mob-nav-dashboard" class="flex-1 py-2 text-center text-xs font-semibold text-sky-600 dark:text-sky-400 border-t-2 border-sky-600">
                     <i class="fa-solid fa-chart-pie block text-sm mb-0.5"></i><span data-i18n="navDashboard">ড্যাশবোর্ড</span>
@@ -264,12 +274,9 @@
 
         <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
 
-            <!-- SECTION 1: DASHBOARD (CLEAN & DEDUPLICATED - No repeated action buttons) -->
+            <!-- DASHBOARD SECTION -->
             <section id="section-dashboard" class="space-y-6">
-                
-                <!-- Clean Summary Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Total Income -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide" data-i18n="totalIncome">মোট আয়</p>
@@ -280,7 +287,6 @@
                         </div>
                     </div>
 
-                    <!-- Total Expense -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide" data-i18n="totalExpense">মোট ব্যয়</p>
@@ -291,7 +297,6 @@
                         </div>
                     </div>
 
-                    <!-- Net Balance -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wide" data-i18n="netBalance">অবশিষ্ট জের (ব্যালেন্স)</p>
@@ -303,10 +308,7 @@
                     </div>
                 </div>
 
-                <!-- Entry Form & Recent Table Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Entry Form -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1">
                         <h2 class="text-base font-bold mb-4 flex items-center text-slate-900 dark:text-white">
                             <i class="fa-solid fa-plus-circle text-sky-600 mr-2"></i><span data-i18n="addNewRecord">নতুন হিসাব যোগ করুন</span>
@@ -335,9 +337,7 @@
                                     <label class="block text-xs font-bold text-slate-600 dark:text-slate-300" data-i18n="category">খাত</label>
                                     <button type="button" onclick="switchSection('categories')" class="text-[11px] text-sky-600 dark:text-sky-400 hover:underline" data-i18n="newCategoryBtn">+ নতুন খাত</button>
                                 </div>
-                                <select id="trans-category" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium focus:outline-none focus:border-sky-500">
-                                    <!-- Dynamic categories populated here -->
-                                </select>
+                                <select id="trans-category" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium focus:outline-none focus:border-sky-500"></select>
                             </div>
 
                             <div>
@@ -356,7 +356,6 @@
                         </form>
                     </div>
 
-                    <!-- Recent List -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-2 flex flex-col">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center">
@@ -376,16 +375,14 @@
                                         <th class="py-2 px-2 text-center" data-i18n="thDelete">মুছুন</th>
                                     </tr>
                                 </thead>
-                                <tbody id="recent-transactions-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                    <!-- Dynamic Rows -->
-                                </tbody>
+                                <tbody id="recent-transactions-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: TRANSACTIONS LIST -->
+            <!-- TRANSACTIONS SECTION -->
             <section id="section-transactions" class="space-y-4 hidden">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -393,7 +390,6 @@
                             <i class="fa-solid fa-list-check text-sky-600 mr-2"></i><span data-i18n="allTransactionsTitle">সকল লেনদেনের তালিকা</span>
                         </h2>
                         
-                        <!-- Filter Controls -->
                         <div class="flex flex-wrap items-center gap-2">
                             <select id="filter-type" onchange="renderFullTransactions()" class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
                                 <option value="all" data-i18n="filterAll">সকল ধরন (আয়/ব্যয়)</option>
@@ -417,19 +413,15 @@
                                     <th class="py-2.5 px-3 text-center" data-i18n="thDelete">মুছুন</th>
                                 </tr>
                             </thead>
-                            <tbody id="full-transactions-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                                <!-- Dynamic Rows -->
-                            </tbody>
+                            <tbody id="full-transactions-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 3: CATEGORIES MANAGEMENT -->
+            <!-- CATEGORIES SECTION -->
             <section id="section-categories" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Add Category Form -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1">
                         <h2 class="text-base font-bold mb-4 text-slate-900 dark:text-white flex items-center">
                             <i class="fa-solid fa-folder-plus text-sky-600 mr-2"></i><span data-i18n="addCategoryTitle">নতুন খাত যুক্ত করুন</span>
@@ -455,35 +447,23 @@
                         </form>
                     </div>
 
-                    <!-- Categories Lists -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        
-                        <!-- Income Categories -->
                         <div class="space-y-2">
-                            <h3 class="font-bold text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 pb-2" data-i18n="incomeCatListTitle">
-                                আয়ের খাতসমূহ
-                            </h3>
-                            <ul id="income-categories-list" class="space-y-1.5 max-h-80 overflow-y-auto pr-1">
-                                <!-- Dynamic -->
-                            </ul>
+                            <h3 class="font-bold text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 pb-2" data-i18n="incomeCatListTitle">আয়ের খাতসমূহ</h3>
+                            <ul id="income-categories-list" class="space-y-1.5 max-h-80 overflow-y-auto pr-1"></ul>
                         </div>
 
-                        <!-- Expense Categories -->
                         <div class="space-y-2">
-                            <h3 class="font-bold text-xs uppercase tracking-wider text-rose-600 dark:text-rose-400 border-b border-slate-200 dark:border-slate-700 pb-2" data-i18n="expenseCatListTitle">
-                                ব্যয়ের খাতসমূহ
-                            </h3>
-                            <ul id="expense-categories-list" class="space-y-1.5 max-h-80 overflow-y-auto pr-1">
-                                <!-- Dynamic -->
-                            </ul>
+                            <h3 class="font-bold text-xs uppercase tracking-wider text-rose-600 dark:text-rose-400 border-b border-slate-200 dark:border-slate-700 pb-2" data-i18n="expenseCatListTitle">ব্যয়ের খাতসমূহ</h3>
+                            <ul id="expense-categories-list" class="space-y-1.5 max-h-80 overflow-y-auto pr-1"></ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 4: USER PROFILE -->
+            <!-- PROFILE SECTION -->
             <section id="section-profile" class="space-y-6 hidden">
-                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 max-w-2xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 max-w-2xl mx-auto space-y-6">
                     
                     <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-5 pb-6 border-b border-slate-200 dark:border-slate-700">
                         <div class="relative">
@@ -501,8 +481,7 @@
                         </div>
                     </div>
 
-                    <!-- Profile Edit Form -->
-                    <form onsubmit="handleUpdateProfile(event)" class="mt-6 space-y-4">
+                    <form onsubmit="handleUpdateProfile(event)" class="space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200" data-i18n="editProfileTitle">তথ্য পরিবর্তন করুন</h3>
 
                         <div>
@@ -540,18 +519,16 @@
         </main>
     </div>
 
-    <!-- DEDICATED PRINT REPORT MODAL -->
+    <!-- PRINT REPORT MODAL -->
     <div id="printable-report-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden print-card-content">
             
-            <!-- Modal Header (Hidden on Print) -->
             <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between no-print bg-slate-50 dark:bg-slate-900">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-print text-sky-600 text-lg"></i>
                     <h3 class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="reportPreviewTitle">রিপোর্ট প্রিভিউ ও প্রিন্ট</h3>
                 </div>
 
-                <!-- Print Filter Options -->
                 <div class="flex items-center space-x-2">
                     <select id="print-month-filter" onchange="renderPrintReport()" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
                         <option value="all" data-i18n="monthAll">সকল মাস</option>
@@ -580,17 +557,13 @@
                 </div>
             </div>
 
-            <!-- Print Content Area -->
             <div class="p-6 overflow-y-auto space-y-4 bg-white text-slate-900 flex-grow" id="print-area">
-                
-                <!-- Report Document Header -->
                 <div class="text-center border-b border-slate-300 pb-4">
                     <h1 class="text-2xl font-bold text-slate-900" data-i18n="printDocTitle">দৈনন্দিন আয়-ব্যয় হিসাব রিপোর্ট</h1>
                     <p class="text-xs text-slate-600 mt-1" id="report-user-info">ব্যবহারকারী: -</p>
                     <p class="text-[11px] text-slate-500 mt-0.5" id="report-date-time"></p>
                 </div>
 
-                <!-- Summary Cards for Print -->
                 <div class="grid grid-cols-3 gap-3 text-center text-xs">
                     <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200">
                         <span class="block text-slate-600 font-bold" data-i18n="totalIncome">মোট আয়</span>
@@ -606,7 +579,6 @@
                     </div>
                 </div>
 
-                <!-- Printable Transactions Table -->
                 <div>
                     <h3 class="font-bold text-xs text-slate-800 mb-2 uppercase tracking-wide" data-i18n="reportTableDetails">লেনদেনের বিস্তারিত বিবরণ</h3>
                     <table class="w-full text-left border-collapse border border-slate-300 text-xs">
@@ -619,24 +591,18 @@
                                 <th class="py-2 px-2 border border-slate-300 text-right" data-i18n="thAmount">পরিমাণ (৳)</th>
                             </tr>
                         </thead>
-                        <tbody id="report-tbody" class="divide-y divide-slate-200">
-                            <!-- Dynamic -->
-                        </tbody>
+                        <tbody id="report-tbody" class="divide-y divide-slate-200"></tbody>
                     </table>
                 </div>
 
-                <!-- Report Footer Notice -->
                 <div class="pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400">
                     <span data-i18n="autoGenNotice">স্বয়ংক্রিয়ভাবে তৈরি করা রিপোর্ট</span>
                     <span data-i18n="systemSavedNotice">আয়-ব্যয় ট্র্যাকার সিস্টেমে সংরক্ষিত</span>
                 </div>
             </div>
 
-            <!-- Modal Footer (Hidden on Print) -->
             <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-end space-x-2 no-print">
-                <button onclick="closePrintModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs hover:bg-slate-300 transition" data-i18n="closeBtn">
-                    বন্ধ করুন
-                </button>
+                <button onclick="closePrintModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs hover:bg-slate-300 transition" data-i18n="closeBtn">বন্ধ করুন</button>
                 <button onclick="triggerPrintProcess()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs shadow transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-print"></i>
                     <span data-i18n="printNow">প্রিন্ট করুন</span>
@@ -646,12 +612,10 @@
     </div>
 
     <script>
-        // App State
         let currentUser = null;
         let currentType = 'income';
         let currentLang = localStorage.getItem('expense_lang') || 'bn';
 
-        // Default categories
         const defaultIncomeCategories = {
             bn: ['বেতন', 'ব্যবসা', 'টিউশনি', 'উপহার', 'অন্যান্য আয়'],
             en: ['Salary', 'Business', 'Tuition', 'Gift', 'Other Income']
@@ -662,7 +626,6 @@
             en: ['House Rent', 'Groceries', 'Transport', 'Bills', 'Medical', 'Other Expense']
         };
 
-        // Multi-Language Translation Dictionary
         const i18n = {
             bn: {
                 appTitle: 'আয়-ব্যয় ট্র্যাকার',
@@ -860,34 +823,23 @@
 
         function applyLanguage() {
             document.documentElement.lang = currentLang;
-
-            // Toggle language button text
             const btnText = currentLang === 'bn' ? 'English' : 'বাংলা';
             document.getElementById('auth-lang-btn-text').innerText = btnText;
             document.getElementById('app-lang-btn-text').innerText = btnText;
 
-            // Translate static text elements
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) {
-                    el.innerText = i18n[currentLang][key];
-                }
+                if (i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
             });
 
-            // Translate input placeholders
             document.querySelectorAll('[data-i18n-ph]').forEach(el => {
                 const key = el.getAttribute('data-i18n-ph');
-                if (i18n[currentLang][key]) {
-                    el.placeholder = i18n[currentLang][key];
-                }
+                if (i18n[currentLang][key]) el.placeholder = i18n[currentLang][key];
             });
 
-            if (currentUser) {
-                refreshAppData();
-            }
+            if (currentUser) refreshAppData();
         }
 
-        // Theme Switcher
         function toggleTheme() {
             const html = document.documentElement;
             if (html.classList.contains('dark')) {
@@ -901,7 +853,6 @@
             }
         }
 
-        // Show/Hide Password
         function togglePasswordVisibility(inputId, iconId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
@@ -929,18 +880,13 @@
         }
 
         window.onload = function() {
-            // Theme setup
             const savedTheme = localStorage.getItem('expense_theme') || 'light';
             if (savedTheme === 'dark') document.documentElement.classList.add('dark');
             else document.documentElement.classList.remove('dark');
 
-            // Set today's date
             document.getElementById('trans-date').value = new Date().toISOString().split('T')[0];
-
-            // Apply Language
             applyLanguage();
 
-            // Auto Session
             const savedUser = localStorage.getItem('current_expense_user');
             if (savedUser) {
                 try {
@@ -969,54 +915,71 @@
             }
         }
 
-        function handleSignup(e) {
+        // Firebase Data Sync Functions
+        async function handleSignup(e) {
             e.preventDefault();
             const name = document.getElementById('signup-name').value.trim();
-            const identifier = document.getElementById('signup-identifier').value.trim().toLowerCase();
+            const identifier = document.getElementById('signup-identifier').value.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
             const address = document.getElementById('signup-address').value.trim() || '';
             const password = document.getElementById('signup-password').value;
 
-            let users = JSON.parse(localStorage.getItem('expense_app_users') || '{}');
+            try {
+                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + identifier));
+                if (snapshot.exists()) {
+                    showToast(i18n[currentLang].toastExistAcc, true);
+                    return;
+                }
 
-            if (users[identifier]) {
-                showToast(i18n[currentLang].toastExistAcc, true);
-                return;
+                const newUser = {
+                    name: name,
+                    identifier: identifier,
+                    address: address,
+                    password: password,
+                    avatar: getAvatarPlaceholder(name),
+                    incomeCategories: [...defaultIncomeCategories[currentLang]],
+                    expenseCategories: [...defaultExpenseCategories[currentLang]],
+                    transactions: []
+                };
+
+                await window.dbSet(window.dbRef(window.db, 'users/' + identifier), newUser);
+                currentUser = newUser;
+                localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
+                showToast(i18n[currentLang].toastAccCreated);
+                startAppSession();
+            } catch (err) {
+                showToast("সার্ভারে সংযোগ করতে সমস্যা হয়েছে!", true);
             }
-
-            users[identifier] = {
-                name: name,
-                identifier: identifier,
-                address: address,
-                password: password,
-                avatar: getAvatarPlaceholder(name),
-                incomeCategories: [...defaultIncomeCategories[currentLang]],
-                expenseCategories: [...defaultExpenseCategories[currentLang]],
-                transactions: []
-            };
-
-            localStorage.setItem('expense_app_users', JSON.stringify(users));
-            currentUser = users[identifier];
-            localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
-            showToast(i18n[currentLang].toastAccCreated);
-            startAppSession();
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
-            const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+            const identifier = document.getElementById('login-identifier').value.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
             const password = document.getElementById('login-password').value;
 
-            let users = JSON.parse(localStorage.getItem('expense_app_users') || '{}');
+            try {
+                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + identifier));
+                if (!snapshot.exists()) {
+                    showToast(i18n[currentLang].toastWrongLogin, true);
+                    return;
+                }
 
-            if (!users[identifier] || users[identifier].password !== password) {
-                showToast(i18n[currentLang].toastWrongLogin, true);
-                return;
+                const userData = snapshot.val();
+                if (userData.password !== password) {
+                    showToast(i18n[currentLang].toastWrongLogin, true);
+                    return;
+                }
+
+                currentUser = userData;
+                if(!currentUser.transactions) currentUser.transactions = [];
+                if(!currentUser.incomeCategories) currentUser.incomeCategories = [...defaultIncomeCategories[currentLang]];
+                if(!currentUser.expenseCategories) currentUser.expenseCategories = [...defaultExpenseCategories[currentLang]];
+
+                localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
+                showToast(i18n[currentLang].toastSuccessLogin);
+                startAppSession();
+            } catch (err) {
+                showToast("লগইন করতে সমস্যা হয়েছে!", true);
             }
-
-            currentUser = users[identifier];
-            localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
-            showToast(i18n[currentLang].toastSuccessLogin);
-            startAppSession();
         }
 
         function handleLogout() {
@@ -1026,17 +989,20 @@
             document.getElementById('auth-container').classList.remove('hidden');
         }
 
+        async function saveUserData() {
+            if (!currentUser) return;
+            try {
+                await window.dbSet(window.dbRef(window.db, 'users/' + currentUser.identifier), currentUser);
+                localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
+            } catch (err) {
+                console.error("Cloud save error", err);
+            }
+        }
+
         function startAppSession() {
             document.getElementById('auth-container').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             refreshAppData();
-        }
-
-        function saveUserData() {
-            let users = JSON.parse(localStorage.getItem('expense_app_users') || '{}');
-            users[currentUser.identifier] = currentUser;
-            localStorage.setItem('expense_app_users', JSON.stringify(users));
-            localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
         }
 
         function handleProfileImageUpload(event) {
@@ -1061,9 +1027,7 @@
 
             currentUser.name = newName;
             currentUser.address = newAddress;
-            if (newPassword && newPassword.length >= 4) {
-                currentUser.password = newPassword;
-            }
+            if (newPassword && newPassword.length >= 4) currentUser.password = newPassword;
 
             saveUserData();
             refreshAppData();
@@ -1072,8 +1036,7 @@
         }
 
         function switchSection(sectionId) {
-            const sections = ['dashboard', 'transactions', 'categories', 'profile'];
-            sections.forEach(sec => {
+            ['dashboard', 'transactions', 'categories', 'profile'].forEach(sec => {
                 const el = document.getElementById('section-' + sec);
                 const nav = document.getElementById('nav-' + sec);
                 const mobNav = document.getElementById('mob-nav-' + sec);
@@ -1135,20 +1098,20 @@
                 return;
             }
 
-            const newTrans = {
+            if(!currentUser.transactions) currentUser.transactions = [];
+
+            currentUser.transactions.unshift({
                 id: 'tx_' + Date.now(),
                 type: currentType,
                 date: date,
                 category: category,
                 amount: amount,
                 note: note
-            };
+            });
 
-            currentUser.transactions.unshift(newTrans);
             saveUserData();
             refreshAppData();
             showToast(i18n[currentLang].toastTransSaved);
-
             document.getElementById('trans-amount').value = '';
             document.getElementById('trans-note').value = '';
         }
@@ -1164,7 +1127,6 @@
             e.preventDefault();
             const type = document.getElementById('cat-type').value;
             const name = document.getElementById('cat-name').value.trim();
-
             if (!name) return;
 
             const list = type === 'income' ? currentUser.incomeCategories : currentUser.expenseCategories;
@@ -1181,11 +1143,8 @@
         }
 
         function deleteCategory(type, name) {
-            if (type === 'income') {
-                currentUser.incomeCategories = currentUser.incomeCategories.filter(c => c !== name);
-            } else {
-                currentUser.expenseCategories = currentUser.expenseCategories.filter(c => c !== name);
-            }
+            if (type === 'income') currentUser.incomeCategories = currentUser.incomeCategories.filter(c => c !== name);
+            else currentUser.expenseCategories = currentUser.expenseCategories.filter(c => c !== name);
             saveUserData();
             refreshAppData();
             showToast(i18n[currentLang].toastCatDeleted);
@@ -1216,24 +1175,21 @@
         }
 
         function renderDashboard() {
-            let totalIncome = 0;
-            let totalExpense = 0;
-
-            currentUser.transactions.forEach(t => {
+            let totalIncome = 0, totalExpense = 0;
+            const transList = currentUser.transactions || [];
+            transList.forEach(t => {
                 if (t.type === 'income') totalIncome += t.amount;
                 else totalExpense += t.amount;
             });
 
-            const netBalance = totalIncome - totalExpense;
-
             document.getElementById('dash-total-income').innerText = formatCurrency(totalIncome);
             document.getElementById('dash-total-expense').innerText = formatCurrency(totalExpense);
-            document.getElementById('dash-net-balance').innerText = formatCurrency(netBalance);
+            document.getElementById('dash-net-balance').innerText = formatCurrency(totalIncome - totalExpense);
 
             const tbody = document.getElementById('recent-transactions-tbody');
             tbody.innerHTML = '';
+            const recent = transList.slice(0, 5);
 
-            const recent = currentUser.transactions.slice(0, 5);
             if (recent.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">${i18n[currentLang].noDataText}</td></tr>`;
                 return;
@@ -1259,10 +1215,10 @@
             const tbody = document.getElementById('full-transactions-tbody');
             const search = document.getElementById('filter-search').value.toLowerCase();
             const typeFilter = document.getElementById('filter-type').value;
-
             tbody.innerHTML = '';
 
-            let filtered = currentUser.transactions.filter(t => {
+            const transList = currentUser.transactions || [];
+            let filtered = transList.filter(t => {
                 const matchesType = typeFilter === 'all' || t.type === typeFilter;
                 const matchesSearch = t.category.toLowerCase().includes(search) || (t.note && t.note.toLowerCase().includes(search));
                 return matchesType && matchesSearch;
@@ -1294,7 +1250,6 @@
         function renderCategoriesList() {
             const incList = document.getElementById('income-categories-list');
             const expList = document.getElementById('expense-categories-list');
-
             incList.innerHTML = '';
             expList.innerHTML = '';
 
@@ -1327,31 +1282,24 @@
         function renderPrintReport() {
             document.getElementById('report-user-info').innerText = `${i18n[currentLang].userLabel} ${currentUser.name} | ${i18n[currentLang].mobileEmailLabel} ${currentUser.identifier}`;
             const now = new Date();
-            const dateStr = now.toLocaleDateString(currentLang === 'bn' ? 'bn-BD' : 'en-US');
-            const timeStr = now.toLocaleTimeString(currentLang === 'bn' ? 'bn-BD' : 'en-US');
-            document.getElementById('report-date-time').innerText = `${i18n[currentLang].reportDateLabel} ${dateStr} (${timeStr})`;
+            document.getElementById('report-date-time').innerText = `${i18n[currentLang].reportDateLabel} ${now.toLocaleDateString()} (${now.toLocaleTimeString()})`;
 
             const monthFilter = document.getElementById('print-month-filter').value;
-
-            let filteredTransactions = currentUser.transactions.filter(t => {
+            const transList = currentUser.transactions || [];
+            let filteredTransactions = transList.filter(t => {
                 if (monthFilter === 'all') return true;
-                const d = new Date(t.date);
-                return d.getMonth().toString() === monthFilter;
+                return new Date(t.date).getMonth().toString() === monthFilter;
             });
 
-            let totalIncome = 0;
-            let totalExpense = 0;
-
+            let totalIncome = 0, totalExpense = 0;
             filteredTransactions.forEach(t => {
                 if (t.type === 'income') totalIncome += t.amount;
                 else totalExpense += t.amount;
             });
 
-            const netBalance = totalIncome - totalExpense;
-
             document.getElementById('report-total-income').innerText = formatCurrency(totalIncome);
             document.getElementById('report-total-expense').innerText = formatCurrency(totalExpense);
-            document.getElementById('report-net-balance').innerText = formatCurrency(netBalance);
+            document.getElementById('report-net-balance').innerText = formatCurrency(totalIncome - totalExpense);
 
             const tbody = document.getElementById('report-tbody');
             tbody.innerHTML = '';
