@@ -35,7 +35,7 @@
     <!-- Google Fonts: Hind Siliguri (Bengali) & Inter (English) -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDK (CDN) -->
+    <!-- Firebase SDK & Realtime Database Setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -54,7 +54,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Make database functions globally accessible
+        // Global bindings
         window.db = db;
         window.dbRef = ref;
         window.dbSet = set;
@@ -915,7 +915,7 @@
             }
         }
 
-        // Firebase Data Sync Functions
+        // Firebase Cloud Functions
         async function handleSignup(e) {
             e.preventDefault();
             const name = document.getElementById('signup-name').value.trim();
