@@ -219,6 +219,7 @@
                     </div>
                 </div>
 
+                <!-- Desktop Navigation Menu -->
                 <nav class="hidden md:flex items-center space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
                     <button onclick="switchSection('dashboard')" id="nav-dashboard" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm transition">
                         <i class="fa-solid fa-chart-pie mr-1"></i><span data-i18n="navDashboard">ড্যাশবোর্ড</span>
@@ -250,7 +251,7 @@
                         <span id="app-lang-btn-text">EN</span>
                     </button>
 
-                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center hover:bg-slate-200 transition">
+                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center hover:bg-slate-200 transition" title="Theme">
                         <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
                         <i class="fa-solid fa-moon inline dark:hidden text-slate-600"></i>
                     </button>
@@ -261,16 +262,16 @@
                     </button>
                 </div>
 
-                <!-- Mobile Hamburger Menu Toggle Button -->
+                <!-- Mobile Hamburger Menu Button -->
                 <div class="flex md:hidden items-center">
-                    <button onclick="toggleMobileMenu()" class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-slate-700 text-sky-600 dark:text-sky-300 flex items-center justify-center text-lg shadow-sm border border-sky-100 dark:border-slate-600">
+                    <button onclick="toggleMobileMenu()" class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-slate-700 text-sky-600 dark:text-sky-300 flex items-center justify-center text-lg shadow-sm border border-sky-100 dark:border-slate-600 focus:outline-none">
                         <i class="fa-solid fa-bars" id="menu-icon"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Mobile Dropdown Menu Drawer -->
-            <div id="mobile-menu-drawer" class="hidden md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 space-y-2 shadow-lg">
+            <!-- Mobile Dropdown Menu Drawer (Containing ALL requested controls including Logout) -->
+            <div id="mobile-menu-drawer" class="hidden md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 space-y-2 shadow-xl">
                 <button onclick="switchSection('dashboard'); toggleMobileMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
                     <i class="fa-solid fa-chart-pie text-sky-600 w-5"></i><span data-i18n="navDashboard">ড্যাশবোর্ড</span>
                 </button>
