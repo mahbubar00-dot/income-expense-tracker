@@ -32,7 +32,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Google Fonts: Hind Siliguri (Bengali) & Inter (English) -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Firebase SDK & Realtime Database Setup -->
@@ -123,6 +123,7 @@
 
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- Authentication Screen Toolbar (Only visible on login/signup page) -->
     <div id="auth-toolbar" class="fixed top-4 right-4 z-50 flex items-center space-x-2">
         <button onclick="toggleLanguage()" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5">
             <i class="fa-solid fa-globe text-sky-600"></i>
@@ -219,7 +220,7 @@
                     </div>
                 </div>
 
-                <!-- Universal Menu Toggle Button (For ALL Devices) -->
+                <!-- Universal Menu Toggle Button -->
                 <div class="flex items-center">
                     <button onclick="toggleMobileMenu()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center space-x-2 shadow transition focus:outline-none">
                         <i class="fa-solid fa-bars" id="menu-icon"></i>
@@ -228,7 +229,7 @@
                 </div>
             </div>
 
-            <!-- Dropdown Menu Drawer (Visible on ALL devices when clicked) -->
+            <!-- Dropdown Menu Drawer -->
             <div id="mobile-menu-drawer" class="hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 space-y-2 shadow-2xl max-w-6xl mx-auto">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     <button onclick="switchSection('dashboard'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-3 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
@@ -996,6 +997,7 @@
             localStorage.removeItem('current_expense_user');
             currentUser = null;
             document.getElementById('app-container').classList.add('hidden');
+            document.getElementById('auth-toolbar').classList.remove('hidden');
             document.getElementById('auth-container').classList.remove('hidden');
         }
 
@@ -1028,6 +1030,7 @@
         }
 
         function startAppSession() {
+            document.getElementById('auth-toolbar').classList.add('hidden');
             document.getElementById('auth-container').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             refreshAppData();
