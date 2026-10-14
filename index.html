@@ -83,7 +83,7 @@
                 background: #ffffff !important;
                 color: #000000 !important;
             }
-            .no-print, header, nav, #toast-container, #auth-toolbar {
+            .no-print, header, nav, #toast-container, #auth-toolbar, #mobile-drawer {
                 display: none !important;
             }
             #printable-report-modal {
@@ -219,6 +219,7 @@
                     </div>
                 </div>
 
+                <!-- Desktop Navigation Bar -->
                 <nav class="hidden md:flex items-center space-x-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
                     <button onclick="switchSection('dashboard')" id="nav-dashboard" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm transition">
                         <i class="fa-solid fa-chart-pie mr-1"></i><span data-i18n="navDashboard">ড্যাশবোর্ড</span>
@@ -234,16 +235,16 @@
                     </button>
                 </nav>
 
-                <div class="flex items-center space-x-1 sm:space-x-2">
-                    <!-- Refresh Button -->
+                <!-- Desktop Quick Toolbar -->
+                <div class="hidden md:flex items-center space-x-2">
                     <button onclick="refreshCloudData()" class="px-2.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow transition flex items-center space-x-1" title="Refresh Data">
                         <i class="fa-solid fa-rotate"></i>
-                        <span class="hidden sm:inline" data-i18n="refreshBtn">রিফ্রেশ</span>
+                        <span data-i18n="refreshBtn">রিফ্রেশ</span>
                     </button>
 
                     <button onclick="openPrintModal()" class="px-2.5 py-1.5 text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow transition flex items-center space-x-1">
                         <i class="fa-solid fa-print"></i>
-                        <span class="hidden sm:inline" data-i18n="printReportBtn">প্রিন্ট</span>
+                        <span data-i18n="printReportBtn">প্রিন্ট</span>
                     </button>
 
                     <button onclick="toggleLanguage()" class="px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition" title="Language">
@@ -255,29 +256,89 @@
                         <i class="fa-solid fa-moon inline dark:hidden text-slate-600"></i>
                     </button>
                     
-                    <!-- Prominent Logout Button -->
                     <button onclick="handleLogout()" class="px-2.5 py-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow transition flex items-center space-x-1" title="Logout">
                         <i class="fa-solid fa-right-from-bracket"></i>
-                        <span class="hidden sm:inline" data-i18n="logout">লগআউট</span>
+                        <span data-i18n="logout">লগআউট</span>
+                    </button>
+                </div>
+
+                <!-- Mobile Hamburger Menu Button -->
+                <div class="flex items-center md:hidden space-x-2">
+                    <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center">
+                        <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+                        <i class="fa-solid fa-moon inline dark:hidden text-slate-600"></i>
+                    </button>
+
+                    <button onclick="toggleMobileMenu()" class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow focus:outline-none">
+                        <i class="fa-solid fa-bars text-lg"></i>
                     </button>
                 </div>
             </div>
-
-            <div class="md:hidden flex border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                <button onclick="switchSection('dashboard')" id="mob-nav-dashboard" class="flex-1 py-2 text-center text-xs font-semibold text-sky-600 dark:text-sky-400 border-t-2 border-sky-600">
-                    <i class="fa-solid fa-chart-pie block text-sm mb-0.5"></i><span data-i18n="navDashboard">ড্যাশবোর্ড</span>
-                </button>
-                <button onclick="switchSection('transactions')" id="mob-nav-transactions" class="flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <i class="fa-solid fa-list block text-sm mb-0.5"></i><span data-i18n="navTransactions">লেনদেন</span>
-                </button>
-                <button onclick="switchSection('categories')" id="mob-nav-categories" class="flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <i class="fa-solid fa-tags block text-sm mb-0.5"></i><span data-i18n="navCategories">খাতসমূহ</span>
-                </button>
-                <button onclick="switchSection('profile')" id="mob-nav-profile" class="flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <i class="fa-solid fa-user block text-sm mb-0.5"></i><span data-i18n="navProfile">প্রোফাইল</span>
-                </button>
-            </div>
         </header>
+
+        <!-- Mobile Drawer Sidebar Menu -->
+        <div id="mobile-drawer" class="fixed inset-0 bg-slate-900/60 z-50 hidden transition-opacity">
+            <div class="fixed top-0 right-0 w-4/5 max-w-xs h-full bg-white dark:bg-slate-800 shadow-2xl flex flex-col justify-between p-5 transition-transform">
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-wallet text-sky-600 text-xl"></i>
+                            <span class="font-bold text-slate-900 dark:text-white text-base" data-i18n="menuTitle">মেনু বার</span>
+                        </div>
+                        <button onclick="toggleMobileMenu()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Menu Nav Links -->
+                    <nav class="space-y-2">
+                        <button onclick="mobileNavClick('dashboard')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fa-solid fa-chart-pie text-sky-600 w-5"></i>
+                            <span data-i18n="navDashboard">ড্যাশবোর্ড</span>
+                        </button>
+                        <button onclick="mobileNavClick('transactions')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fa-solid fa-list text-sky-600 w-5"></i>
+                            <span data-i18n="navTransactions">লেনদেন</span>
+                        </button>
+                        <button onclick="mobileNavClick('categories')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fa-solid fa-tags text-sky-600 w-5"></i>
+                            <span data-i18n="navCategories">খাতসমূহ</span>
+                        </button>
+                        <button onclick="mobileNavClick('profile')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fa-solid fa-user text-sky-600 w-5"></i>
+                            <span data-i18n="navProfile">প্রোফাইল</span>
+                        </button>
+                        
+                        <div class="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                            <button onclick="refreshCloudData(); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
+                                <i class="fa-solid fa-rotate w-5"></i>
+                                <span data-i18n="refreshBtn">রিফ্রেশ করুন</span>
+                            </button>
+                            
+                            <button onclick="openPrintModal(); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30">
+                                <i class="fa-solid fa-print w-5"></i>
+                                <span data-i18n="printReportBtn">রিপোর্ট প্রিন্ট</span>
+                            </button>
+
+                            <button onclick="toggleLanguage()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
+                                <i class="fa-solid fa-globe text-sky-600 w-5"></i>
+                                <span id="mob-lang-btn-text">ভাষা পরিবর্তন (English)</span>
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+
+                <!-- Prominent Logout Button in Mobile Menu -->
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <button onclick="handleLogout()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow flex items-center justify-center space-x-2 text-sm transition">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span data-i18n="logout">লগআউট করুন</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
 
         <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
 
@@ -710,6 +771,7 @@
                 systemSavedNotice: 'আয়-ব্যয় ট্র্যাকার সিস্টেমে সংরক্ষিত',
                 closeBtn: 'বন্ধ করুন',
                 profile: 'প্রোফাইল',
+                menuTitle: 'মেনু বার',
                 noDataText: 'কোনো তথ্য নেই',
                 noDataFound: 'কোনো তথ্য পাওয়া যায়নি',
                 userLabel: 'ব্যবহারকারী:',
@@ -805,6 +867,7 @@
                 systemSavedNotice: 'Saved in Income-Expense Tracker',
                 closeBtn: 'Close',
                 profile: 'Profile',
+                menuTitle: 'Menu Bar',
                 noDataText: 'No data available',
                 noDataFound: 'No records found',
                 userLabel: 'User:',
@@ -826,6 +889,16 @@
             }
         };
 
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobile-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function mobileNavClick(sectionId) {
+            switchSection(sectionId);
+            toggleMobileMenu();
+        }
+
         function toggleLanguage() {
             currentLang = currentLang === 'bn' ? 'en' : 'bn';
             localStorage.setItem('expense_lang', currentLang);
@@ -837,6 +910,7 @@
             const btnText = currentLang === 'bn' ? 'EN' : 'বাং';
             document.getElementById('auth-lang-btn-text').innerText = currentLang === 'bn' ? 'English' : 'বাংলা';
             document.getElementById('app-lang-btn-text').innerText = btnText;
+            document.getElementById('mob-lang-btn-text').innerText = currentLang === 'bn' ? 'English (ইংরেজি)' : 'বাংলা (Bengali)';
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -998,6 +1072,8 @@
             currentUser = null;
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('auth-container').classList.remove('hidden');
+            const drawer = document.getElementById('mobile-drawer');
+            if(drawer && !drawer.classList.contains('hidden')) drawer.classList.add('hidden');
         }
 
         async function saveUserData() {
@@ -1068,16 +1144,13 @@
             ['dashboard', 'transactions', 'categories', 'profile'].forEach(sec => {
                 const el = document.getElementById('section-' + sec);
                 const nav = document.getElementById('nav-' + sec);
-                const mobNav = document.getElementById('mob-nav-' + sec);
 
                 if (sec === sectionId) {
                     el.classList.remove('hidden');
                     if (nav) nav.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm transition";
-                    if (mobNav) mobNav.className = "flex-1 py-2 text-center text-xs font-semibold text-sky-600 dark:text-sky-400 border-t-2 border-sky-600";
                 } else {
                     el.classList.add('hidden');
                     if (nav) nav.className = "px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition";
-                    if (mobNav) mobNav.className = "flex-1 py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400";
                 }
             });
         }
