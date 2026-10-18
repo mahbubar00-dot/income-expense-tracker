@@ -310,24 +310,28 @@
                     </div>
                 </div>
 
-                <!-- PIE CHARTS SECTION -->
+                <!-- PIE CHARTS & CATEGORY BREAKDOWN -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- INCOME BREAKDOWN -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center">
                         <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center">
                             <i class="fa-solid fa-chart-pie text-emerald-500 mr-2"></i><span data-i18n="incomeCategoryPie">খাতভিত্তিক আয়ের বিশ্লেষণ</span>
                         </h3>
-                        <div class="w-full max-w-[260px] h-[260px] flex items-center justify-center">
+                        <div class="w-full max-w-[240px] h-[240px] flex items-center justify-center mb-4">
                             <canvas id="incomePieChart"></canvas>
                         </div>
+                        <div class="w-full border-t border-slate-100 dark:border-slate-700 pt-3 space-y-1.5" id="income-category-summary-list"></div>
                     </div>
 
+                    <!-- EXPENSE BREAKDOWN -->
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center">
                         <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center">
                             <i class="fa-solid fa-chart-pie text-rose-500 mr-2"></i><span data-i18n="expenseCategoryPie">খাতভিত্তিক ব্যয়ের বিশ্লেষণ</span>
                         </h3>
-                        <div class="w-full max-w-[260px] h-[260px] flex items-center justify-center">
+                        <div class="w-full max-w-[240px] h-[240px] flex items-center justify-center mb-4">
                             <canvas id="expensePieChart"></canvas>
                         </div>
+                        <div class="w-full border-t border-slate-100 dark:border-slate-700 pt-3 space-y-1.5" id="expense-category-summary-list"></div>
                     </div>
                 </div>
 
@@ -595,13 +599,14 @@
     <div id="printable-report-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden print-card-content">
             
-            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between no-print bg-slate-50 dark:bg-slate-900">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 no-print bg-slate-50 dark:bg-slate-900">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-print text-sky-600 text-lg"></i>
                     <h3 class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="reportPreviewTitle">রিপোর্ট প্রিভিউ ও প্রিন্ট</h3>
                 </div>
 
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- MONTH FILTER -->
                     <select id="print-month-filter" onchange="renderPrintReport()" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
                         <option value="all" data-i18n="monthAll">সকল মাস</option>
                         <option value="0" data-i18n="mJan">জানুয়ারি</option>
@@ -616,6 +621,11 @@
                         <option value="9" data-i18n="mOct">অক্টোবর</option>
                         <option value="10" data-i18n="mNov">নভেম্বর</option>
                         <option value="11" data-i18n="mDec">ডিসেম্বর</option>
+                    </select>
+
+                    <!-- CATEGORY FILTER FOR PRINTING -->
+                    <select id="print-category-filter" onchange="renderPrintReport()" class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
+                        <option value="all">সকল খাত (All Categories)</option>
                     </select>
 
                     <button onclick="triggerPrintProcess()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow transition flex items-center space-x-1">
@@ -1369,14 +1379,18 @@
 
             // Group Income Data by Category
             const incomeMap = {};
+            let totalIncome = 0;
             transList.filter(t => t.type === 'income').forEach(t => {
                 incomeMap[t.category] = (incomeMap[t.category] || 0) + t.amount;
+                totalIncome += t.amount;
             });
 
             // Group Expense Data by Category
             const expenseMap = {};
+            let totalExpense = 0;
             transList.filter(t => t.type === 'expense').forEach(t => {
                 expenseMap[t.category] = (expenseMap[t.category] || 0) + t.amount;
+                totalExpense += t.amount;
             });
 
             const chartColors = [
@@ -1442,6 +1456,37 @@
                     }
                 }
             });
+
+            // Render Category Summary Lists Below Pie Charts
+            const incListEl = document.getElementById('income-category-summary-list');
+            incListEl.innerHTML = '';
+            if(incLabels.length === 0) {
+                incListEl.innerHTML = `<p class="text-xs text-center text-slate-400 py-2">${i18n[currentLang].noDataText}</p>`;
+            } else {
+                incLabels.forEach((cat, idx) => {
+                    const amt = incomeMap[cat];
+                    const pct = totalIncome > 0 ? ((amt / totalIncome) * 100).toFixed(1) : 0;
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between text-xs font-semibold";
+                    item.innerHTML = `<span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${chartColors[idx % chartColors.length]}"></span>${cat}</span> <span>${formatCurrency(amt)} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>`;
+                    incListEl.appendChild(item);
+                });
+            }
+
+            const expListEl = document.getElementById('expense-category-summary-list');
+            expListEl.innerHTML = '';
+            if(expLabels.length === 0) {
+                expListEl.innerHTML = `<p class="text-xs text-center text-slate-400 py-2">${i18n[currentLang].noDataText}</p>`;
+            } else {
+                expLabels.forEach((cat, idx) => {
+                    const amt = expenseMap[cat];
+                    const pct = totalExpense > 0 ? ((amt / totalExpense) * 100).toFixed(1) : 0;
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between text-xs font-semibold";
+                    item.innerHTML = `<span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${chartColors[idx % chartColors.length]}"></span>${cat}</span> <span>${formatCurrency(amt)} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>`;
+                    expListEl.appendChild(item);
+                });
+            }
         }
 
         function renderFullTransactions() {
@@ -1504,6 +1549,7 @@
         }
 
         function openPrintModal() {
+            populatePrintCategoryDropdown();
             document.getElementById('printable-report-modal').classList.remove('hidden');
             renderPrintReport();
         }
@@ -1512,16 +1558,36 @@
             document.getElementById('printable-report-modal').classList.add('hidden');
         }
 
+        function populatePrintCategoryDropdown() {
+            const select = document.getElementById('print-category-filter');
+            select.innerHTML = '<option value="all">সকল খাত (All Categories)</option>';
+            
+            const allCats = new Set([
+                ...(currentUser.incomeCategories || []),
+                ...(currentUser.expenseCategories || [])
+            ]);
+
+            allCats.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+        }
+
         function renderPrintReport() {
             document.getElementById('report-user-info').innerText = `${i18n[currentLang].userLabel} ${currentUser.name} | ${i18n[currentLang].mobileEmailLabel} ${currentUser.identifier}`;
             const now = new Date();
             document.getElementById('report-date-time').innerText = `${i18n[currentLang].reportDateLabel} ${now.toLocaleDateString()} (${now.toLocaleTimeString()})`;
 
             const monthFilter = document.getElementById('print-month-filter').value;
+            const categoryFilter = document.getElementById('print-category-filter').value;
             const transList = currentUser.transactions || [];
+
             let filteredTransactions = transList.filter(t => {
-                if (monthFilter === 'all') return true;
-                return new Date(t.date).getMonth().toString() === monthFilter;
+                const matchesMonth = monthFilter === 'all' || new Date(t.date).getMonth().toString() === monthFilter;
+                const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
+                return matchesMonth && matchesCategory;
             });
 
             let totalIncome = 0, totalExpense = 0;
