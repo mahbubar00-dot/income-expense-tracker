@@ -122,6 +122,7 @@
                     </button>
                     <button onclick="switchSection('dashboard')" class="hidden sm:flex px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold" data-i18n="navDash">ড্যাশবোর্ড</button>
                     <button onclick="switchSection('t-statement')" class="hidden sm:flex px-3 py-1.5 bg-sky-50 dark:bg-sky-950 text-sky-600 rounded-xl text-xs font-bold" data-i18n="navT">টি-ছক বিবরণী</button>
+                    <button onclick="switchSection('categories')" class="hidden sm:flex px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 rounded-xl text-xs font-bold" data-i18n="navCat">খাত ম্যানেজ</button>
                     <button onclick="switchSection('profile')" class="hidden sm:flex px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold" data-i18n="navProfile">প্রোফাইল</button>
                     <button onclick="switchSection('admin')" class="hidden sm:flex px-3 py-1.5 bg-purple-50 text-purple-600 rounded-xl text-xs font-bold" data-i18n="navAdmin">এডমিন</button>
                     <button onclick="openPrintModal()" class="px-3 py-1.5 bg-emerald-50 text-emerald-600 font-bold rounded-xl text-xs border border-emerald-200"><i class="fa-solid fa-print"></i> <span data-i18n="printBtn">প্রিন্ট</span></button>
@@ -134,6 +135,7 @@
                 <button onclick="toggleLanguage(); toggleMobileMenu();" class="p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-globe mr-1"></i> <span id="mob-lang-text">English / বাংলা</span></button>
                 <button onclick="switchSection('dashboard'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-chart-pie mr-1 text-sky-500"></i> <span data-i18n="navDash">ড্যাশবোর্ড</span></button>
                 <button onclick="switchSection('t-statement'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-table-cells mr-1 text-sky-500"></i> <span data-i18n="navT">টি-ছক বিবরণী</span></button>
+                <button onclick="switchSection('categories'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-tags mr-1 text-indigo-500"></i> <span data-i18n="navCat">খাত ম্যানেজ</span></button>
                 <button onclick="switchSection('profile'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-user mr-1 text-sky-500"></i> <span data-i18n="navProfile">প্রোফাইল</span></button>
                 <button onclick="switchSection('admin'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-user-shield mr-1 text-purple-500"></i> <span data-i18n="navAdmin">এডমিন প্যানেল</span></button>
                 <button onclick="logout()" class="p-2 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg text-left col-span-2"><i class="fa-solid fa-right-from-bracket mr-1"></i> <span data-i18n="logoutBtn">লগআউট</span></button>
@@ -172,16 +174,21 @@
                     </div>
                 </div>
 
-                <!-- Add Transaction Form -->
+                <!-- Add Transaction Form (Select Category) -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm">
-                    <h2 class="font-bold text-xs mb-3 text-sky-600" data-i18n="addTxTitle">নতুন হিসাব যোগ করুন</h2>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-bold text-xs text-sky-600" data-i18n="addTxTitle">নতুন হিসাব যোগ করুন</h2>
+                        <button onclick="switchSection('categories')" class="text-[11px] text-indigo-600 font-bold hover:underline" data-i18n="addNewCatLink">+ নতুন খাত যোগ করুন</button>
+                    </div>
                     <form onsubmit="addTransaction(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                        <select id="tx-type" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold">
+                        <select id="tx-type" onchange="updateCategoryDropdown()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold">
                             <option value="income" data-i18n="optInc">আয় (+)</option>
                             <option value="expense" data-i18n="optExp">ব্যয় (-)</option>
                         </select>
                         <input type="date" id="tx-date" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
-                        <input type="text" id="tx-cat" required data-i18n-ph="catPh" placeholder="খাত (যেমন: বেতন/বাজার)" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        <select id="tx-cat" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold">
+                            <!-- Populated dynamically -->
+                        </select>
                         <input type="number" step="0.01" id="tx-amount" required data-i18n-ph="amountPh" placeholder="টাকার পরিমাণ" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
                         <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs py-2 shadow" data-i18n="addBtn">যুক্ত করুন</button>
                     </form>
@@ -250,7 +257,39 @@
                 </div>
             </section>
 
-            <!-- 3. PROFILE SECTION -->
+            <!-- 3. CATEGORIES MANAGEMENT SECTION (খাত ম্যানেজমেন্ট) -->
+            <section id="sec-categories" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-2xl mx-auto space-y-6">
+                    <div class="border-b pb-3">
+                        <h2 class="font-bold text-sm text-indigo-600" data-i18n="catMgmtTitle">খাত ব্যবস্থাপনা (Category Management)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5" data-i18n="catMgmtSub">নতুন খাত যোগ করুন অথবা আপনার প্রয়োজনমতো খাত ডিলিট করুন</p>
+                    </div>
+
+                    <!-- Add Category Form -->
+                    <form onsubmit="addNewCategory(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border">
+                        <select id="new-cat-type" class="px-3 py-2 bg-white dark:bg-slate-800 border rounded-xl text-xs font-bold">
+                            <option value="income" data-i18n="optInc">আয় খাত</option>
+                            <option value="expense" data-i18n="optExp">ব্যয় খাত</option>
+                        </select>
+                        <input type="text" id="new-cat-name" required data-i18n-ph="newCatPh" placeholder="নতুন খাতের নাম" class="px-3 py-2 bg-white dark:bg-slate-800 border rounded-xl text-xs">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs py-2 shadow" data-i18n="addCatBtn">খাত যুক্ত করুন</button>
+                    </form>
+
+                    <!-- Categories Lists Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="border p-4 rounded-xl space-y-2">
+                            <h3 class="font-bold text-xs text-emerald-600 border-b pb-1" data-i18n="incCatListTitle">আয়ের খাতসমূহ</h3>
+                            <ul id="income-cats-ul" class="space-y-1.5 max-h-48 overflow-y-auto"></ul>
+                        </div>
+                        <div class="border p-4 rounded-xl space-y-2">
+                            <h3 class="font-bold text-xs text-rose-600 border-b pb-1" data-i18n="expCatListTitle">ব্যয়ের খাতসমূহ</h3>
+                            <ul id="expense-cats-ul" class="space-y-1.5 max-h-48 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. PROFILE SECTION -->
             <section id="sec-profile" class="space-y-4 hidden">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-xl mx-auto space-y-5">
                     <div class="flex items-center space-x-4 border-b pb-4">
@@ -279,7 +318,7 @@
                 </div>
             </section>
 
-            <!-- 4. ADMIN SECTION -->
+            <!-- 5. ADMIN SECTION -->
             <section id="sec-admin" class="space-y-4 hidden">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm space-y-4">
                     <div class="flex items-center justify-between border-b pb-3">
@@ -338,6 +377,17 @@
         let currentLang = localStorage.getItem('simple_lang') || 'bn';
         let incomeChart = null, expenseChart = null;
 
+        const defaultIncomeCategories = [
+            "বেতন / Salary", "ব্যবসা / Business", "টিউশনি / Tuition", "বোনাস / Bonus", 
+            "উপহার / Gift", "কৃষি আয় / Agriculture", "ভাড়া প্রাপ্তি / Rent", "অন্যান্য আয় / Other Income"
+        ];
+
+        const defaultExpenseCategories = [
+            "ঘর ভাড়া / House Rent", "বাজার খরচ / Groceries", "যাতায়াত / Transport", "বিদ্যুৎ বিল / Electricity Bill", 
+            "গ্যাস ও পানি বিল / Utility Bill", "মোবাইল ও ইন্টারনেট / Internet", "চিকিৎসা / Medical", "শিক্ষা খরচ / Education", 
+            "নাস্তা ও আপ্যায়ন / Food & Snacks", "দান-খয়রাত / Charity", "অন্যান্য ব্যয় / Other Expense"
+        ];
+
         const translations = {
             bn: {
                 appTitle: "আয়-ব্যয় ট্র্যাকার",
@@ -352,6 +402,7 @@
                 dashSub: "ড্যাশবোর্ড",
                 navDash: "ড্যাশবোর্ড",
                 navT: "টি-ছক বিবরণী",
+                navCat: "খাত ম্যানেজ",
                 navProfile: "প্রোফাইল",
                 navAdmin: "এডমিন",
                 printBtn: "প্রিন্ট",
@@ -363,9 +414,9 @@
                 incPieTitle: "আয়ের খাতভিত্তিক পাই চার্ট",
                 expPieTitle: "ব্যয়ের খাতভিত্তিক পাই চার্ট",
                 addTxTitle: "নতুন হিসাব যোগ করুন",
+                addNewCatLink: "+ নতুন খাত যোগ করুন",
                 optInc: "আয় (+)",
                 optExp: "ব্যয় (-)",
-                catPh: "খাত (যেমন: বেতন/বাজার)",
                 amountPh: "টাকার পরিমাণ",
                 addBtn: "যুক্ত করুন",
                 recentTitle: "সাম্প্রতিক আয়-ব্যয়ের বিবরণী",
@@ -380,6 +431,12 @@
                 tIncHeader: "প্রাপ্তি / আয় (Income)",
                 tExpHeader: "প্রদান / ব্যয় (Expense)",
                 thDateCat: "তারিখ ও খাত",
+                catMgmtTitle: "খাত ব্যবস্থাপনা (Category Management)",
+                catMgmtSub: "নতুন খাত যোগ করুন অথবা আপনার প্রয়োজনমতো খাত ডিলিট করুন",
+                newCatPh: "নতুন খাতের নাম",
+                addCatBtn: "খাত যুক্ত করুন",
+                incCatListTitle: "আয়ের খাতসমূহ",
+                expCatListTitle: "ব্যয়ের খাতসমূহ",
                 profNameChange: "নাম পরিবর্তন",
                 profAddress: "ঠিকানা",
                 addressPh: "আপনার ঠিকানা",
@@ -398,6 +455,8 @@
                 toastLoginErr: "ভুল নম্বর অথবা পাসওয়ার্ড!",
                 toastTxAdded: "হিসাব সংরক্ষণ করা হয়েছে!",
                 toastTxDel: "লেনদেন মুছে ফেলা হয়েছে!",
+                toastCatAdded: "নতুন খাত যুক্ত করা হয়েছে!",
+                toastCatDel: "খাত মুছে ফেলা হয়েছে!",
                 toastProfUpdated: "প্রোফাইল আপডেট করা হয়েছে!",
                 noData: "কোনো তথ্য নেই"
             },
@@ -414,6 +473,7 @@
                 dashSub: "Dashboard",
                 navDash: "Dashboard",
                 navT: "T-Statement",
+                navCat: "Categories",
                 navProfile: "Profile",
                 navAdmin: "Admin",
                 printBtn: "Print",
@@ -425,9 +485,9 @@
                 incPieTitle: "Income Category Pie Chart",
                 expPieTitle: "Expense Category Pie Chart",
                 addTxTitle: "Add New Transaction",
+                addNewCatLink: "+ Add New Category",
                 optInc: "Income (+)",
                 optExp: "Expense (-)",
-                catPh: "Category (e.g. Salary/Food)",
                 amountPh: "Amount",
                 addBtn: "Add Record",
                 recentTitle: "Recent Transactions",
@@ -442,6 +502,12 @@
                 tIncHeader: "Receipts / Income",
                 tExpHeader: "Payments / Expense",
                 thDateCat: "Date & Category",
+                catMgmtTitle: "Category Management",
+                catMgmtSub: "Add new categories or delete existing ones",
+                newCatPh: "New category name",
+                addCatBtn: "Add Category",
+                incCatListTitle: "Income Categories",
+                expCatListTitle: "Expense Categories",
                 profNameChange: "Change Name",
                 profAddress: "Address",
                 addressPh: "Your address",
@@ -460,6 +526,8 @@
                 toastLoginErr: "Invalid mobile/email or password!",
                 toastTxAdded: "Transaction saved successfully!",
                 toastTxDel: "Transaction deleted!",
+                toastCatAdded: "New category added!",
+                toastCatDel: "Category deleted!",
                 toastProfUpdated: "Profile updated successfully!",
                 noData: "No data available"
             }
@@ -495,6 +563,11 @@
                 const key = el.getAttribute('data-i18n-ph');
                 if (t[key]) el.placeholder = t[key];
             });
+
+            if (currentUserKey) {
+                updateCategoryDropdown();
+                renderCategoriesLists();
+            }
         }
 
         function togglePass(inputId, iconId) {
@@ -528,11 +601,12 @@
         }
 
         function switchSection(secId) {
-            ['dashboard', 't-statement', 'profile', 'admin'].forEach(s => {
+            ['dashboard', 't-statement', 'categories', 'profile', 'admin'].forEach(s => {
                 document.getElementById('sec-' + s).classList.add('hidden');
             });
             document.getElementById('sec-' + secId).classList.remove('hidden');
             if (secId === 'admin') renderAdmin();
+            if (secId === 'categories') renderCategoriesLists();
         }
 
         function handleRegister(e) {
@@ -546,7 +620,11 @@
                 return;
             }
 
-            dbUsers[id] = { name, pass, address: '', avatar: '', txs: [] };
+            dbUsers[id] = { 
+                name, pass, address: '', avatar: '', txs: [],
+                incomeCats: [...defaultIncomeCategories],
+                expenseCats: [...defaultExpenseCategories]
+            };
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastAccCreated);
             switchTab('login');
@@ -564,6 +642,14 @@
 
             currentUserKey = id;
             localStorage.setItem('simple_current_user', id);
+            
+            // Backward compatibility for existing users without categories
+            if (!dbUsers[currentUserKey].incomeCats) {
+                dbUsers[currentUserKey].incomeCats = [...defaultIncomeCategories];
+                dbUsers[currentUserKey].expenseCats = [...defaultExpenseCategories];
+                localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            }
+
             showToast(translations[currentLang].toastLoginSuccess);
             initApp();
         }
@@ -590,14 +676,87 @@
             document.getElementById('profile-address-input').value = user.address || '';
             document.getElementById('profile-pic-input').value = user.avatar || '';
 
+            updateCategoryDropdown();
             renderData();
+        }
+
+        function updateCategoryDropdown() {
+            const type = document.getElementById('tx-type').value;
+            const catSelect = document.getElementById('tx-cat');
+            catSelect.innerHTML = '';
+            
+            const user = dbUsers[currentUserKey];
+            const cats = type === 'income' ? user.incomeCats : user.expenseCats;
+
+            cats.forEach(c => {
+                catSelect.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        }
+
+        function addNewCategory(e) {
+            e.preventDefault();
+            const type = document.getElementById('new-cat-type').value;
+            const name = document.getElementById('new-cat-name').value.trim();
+            if (!name) return;
+
+            const user = dbUsers[currentUserKey];
+            const list = type === 'income' ? user.incomeCats : user.expenseCats;
+
+            if (list.includes(name)) {
+                showToast(currentLang === 'bn' ? 'এই খাতটি ইতিমধ্যে রয়েছে!' : 'Category already exists!', true);
+                return;
+            }
+
+            list.push(name);
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            showToast(translations[currentLang].toastCatAdded);
+            document.getElementById('new-cat-name').value = '';
+            renderCategoriesLists();
+            updateCategoryDropdown();
+        }
+
+        function deleteCategory(type, catName) {
+            const user = dbUsers[currentUserKey];
+            if (type === 'income') {
+                if (user.incomeCats.length <= 1) {
+                    showToast(currentLang === 'bn' ? 'কমপক্ষে একটি খাত থাকা আবশ্যক!' : 'At least one category required!', true);
+                    return;
+                }
+                user.incomeCats = user.incomeCats.filter(c => c !== catName);
+            } else {
+                if (user.expenseCats.length <= 1) {
+                    showToast(currentLang === 'bn' ? 'কমপক্ষে একটি খাত থাকা আবশ্যক!' : 'At least one category required!', true);
+                    return;
+                }
+                user.expenseCats = user.expenseCats.filter(c => c !== catName);
+            }
+
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            showToast(translations[currentLang].toastCatDel);
+            renderCategoriesLists();
+            updateCategoryDropdown();
+        }
+
+        function renderCategoriesLists() {
+            const user = dbUsers[currentUserKey];
+            const incUl = document.getElementById('income-cats-ul');
+            const expUl = document.getElementById('expense-cats-ul');
+            incUl.innerHTML = ''; expUl.innerHTML = '';
+
+            user.incomeCats.forEach(c => {
+                incUl.innerHTML += `<li class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-900 border rounded-lg text-xs"><span>${c}</span> <button onclick="deleteCategory('income', '${c}')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button></li>`;
+            });
+
+            user.expenseCats.forEach(c => {
+                expUl.innerHTML += `<li class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-900 border rounded-lg text-xs"><span>${c}</span> <button onclick="deleteCategory('expense', '${c}')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button></li>`;
+            });
         }
 
         function addTransaction(e) {
             e.preventDefault();
             const type = document.getElementById('tx-type').value;
             const date = document.getElementById('tx-date').value;
-            const cat = document.getElementById('tx-cat').value.trim();
+            const cat = document.getElementById('tx-cat').value;
             const amount = parseFloat(document.getElementById('tx-amount').value);
 
             const user = dbUsers[currentUserKey];
@@ -606,7 +765,6 @@
 
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastTxAdded);
-            document.getElementById('tx-cat').value = '';
             document.getElementById('tx-amount').value = '';
             renderData();
         }
@@ -649,7 +807,6 @@
                 const typeLabel = t.type === 'income' ? (currentLang === 'bn' ? 'আয়' : 'Income') : (currentLang === 'bn' ? 'ব্যয়' : 'Expense');
                 const badgeClass = t.type === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
 
-                // Recent Transactions Row
                 recentTBody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50">
                         <td class="p-2.5 text-slate-500">${t.date}</td>
@@ -660,7 +817,6 @@
                     </tr>
                 `;
 
-                // T-Statement Data
                 if (t.type === 'income') {
                     income += t.amount;
                     incMap[t.cat] = (incMap[t.cat] || 0) + t.amount;
@@ -683,7 +839,7 @@
             if (incomeChart) incomeChart.destroy();
             if (expenseChart) expenseChart.destroy();
 
-            const colors = ['#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'];
+            const colors = ['#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#14b8a6', '#6366f1'];
 
             incomeChart = new Chart(document.getElementById('incomeChart').getContext('2d'), {
                 type: 'pie',
