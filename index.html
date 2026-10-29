@@ -1064,7 +1064,8 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            const identifier = document.getElementById('login-identifier').value.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
+            const rawIdentifier = document.getElementById('login-identifier').value.trim();
+            const identifier = rawIdentifier.toLowerCase().replace(/[.#$\[\]]/g, "_");
             const password = document.getElementById('login-password').value;
 
             try {
