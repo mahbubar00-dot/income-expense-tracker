@@ -1075,7 +1075,6 @@
             const password = document.getElementById('login-password').value;
 
             try {
-                // Fetch all users to safely check matching identifiers or cleaned keys
                 const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users'));
                 
                 if (!snapshot.exists()) {
@@ -1365,6 +1364,10 @@
         function renderDashboard() {
             let totalIncome = 0, totalExpense = 0;
             const transList = currentUser.transactions || [];
+            
+            // Sort by date descending so newest entries always appear first
+            transList.sort((a, b) => new Date(b.date) - new Date(a.date));
+
             transList.forEach(t => {
                 if (t.type === 'income') totalIncome += t.amount;
                 else totalExpense += t.amount;
@@ -1376,7 +1379,7 @@
 
             const tbody = document.getElementById('recent-transactions-tbody');
             tbody.innerHTML = '';
-            const recent = transList.slice(0, 5);
+            const recent = transList.slice(0, 10); // Increased to show up to 10 recent transactions
 
             if (recent.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">${i18n[currentLang].noDataText}</td></tr>`;
@@ -1522,6 +1525,8 @@
             tbody.innerHTML = '';
 
             const transList = currentUser.transactions || [];
+            transList.sort((a, b) => new Date(b.date) - new Date(a.date));
+
             let filtered = transList.filter(t => {
                 const matchesType = typeFilter === 'all' || t.type === typeFilter;
                 const matchesSearch = t.category.toLowerCase().includes(search) || (t.note && t.note.toLowerCase().includes(search));
