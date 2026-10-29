@@ -174,7 +174,7 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow transition duration-150">
+                <button type="submit" id="login-submit-btn" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow transition duration-150">
                     <span data-i18n="loginBtn">প্রবেশ করুন</span> <i class="fa-solid fa-arrow-right ml-1"></i>
                 </button>
             </form>
@@ -202,7 +202,7 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow transition duration-150">
+                <button type="submit" id="signup-submit-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow transition duration-150">
                     <span data-i18n="signupBtn">অ্যাকাউন্ট তৈরি করুন</span> <i class="fa-solid fa-user-plus ml-1"></i>
                 </button>
             </form>
@@ -809,7 +809,7 @@
                 toastCatDeleted: 'খাতটি মুছে ফেলা হয়েছে',
                 toastPicUpdated: 'ছবি আপডেট করা হয়েছে',
                 toastInfoSaved: 'তথ্য সংরক্ষিত হয়েছে',
-                toastWrongLogin: 'সঠিক তথ্য দিয়ে চেষ্টা করুন!',
+                toastWrongLogin: 'সঠিক মোবাইল/ইমেইল ও পাসওয়ার্ড দিন!',
                 toastRefreshed: 'তথ্য আপডেট করা হয়েছে!'
             },
             en: {
@@ -910,7 +910,7 @@
                 toastCatDeleted: 'Category deleted',
                 toastPicUpdated: 'Profile picture updated',
                 toastInfoSaved: 'Information saved successfully',
-                toastWrongLogin: 'Invalid login details!',
+                toastWrongLogin: 'Invalid mobile/email or password!',
                 toastRefreshed: 'Data refreshed successfully!'
             }
         };
@@ -990,6 +990,10 @@
             return `https://placehold.co/100x100/0284c7/ffffff?text=${initial}`;
         }
 
+        function cleanKey(str) {
+            return str.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, "_");
+        }
+
         window.onload = function() {
             const savedTheme = localStorage.getItem('expense_theme') || 'light';
             if (savedTheme === 'dark') document.documentElement.classList.add('dark');
@@ -1030,12 +1034,13 @@
         async function handleSignup(e) {
             e.preventDefault();
             const name = document.getElementById('signup-name').value.trim();
-            const identifier = document.getElementById('signup-identifier').value.trim().toLowerCase().replace(/[.#$\[\]]/g, "_");
+            const rawIdentifier = document.getElementById('signup-identifier').value.trim();
+            const identifierKey = cleanKey(rawIdentifier);
             const address = document.getElementById('signup-address').value.trim() || '';
             const password = document.getElementById('signup-password').value;
 
             try {
-                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + identifier));
+                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + identifierKey));
                 if (snapshot.exists()) {
                     showToast(i18n[currentLang].toastExistAcc, true);
                     return;
@@ -1043,7 +1048,8 @@
 
                 const newUser = {
                     name: name,
-                    identifier: identifier,
+                    rawIdentifier: rawIdentifier,
+                    identifier: identifierKey,
                     address: address,
                     password: password,
                     avatar: getAvatarPlaceholder(name),
@@ -1052,7 +1058,7 @@
                     transactions: []
                 };
 
-                await window.dbSet(window.dbRef(window.db, 'users/' + identifier), newUser);
+                await window.dbSet(window.dbRef(window.db, 'users/' + identifierKey), newUser);
                 currentUser = newUser;
                 localStorage.setItem('current_expense_user', JSON.stringify(currentUser));
                 showToast(i18n[currentLang].toastAccCreated);
@@ -1064,24 +1070,43 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            const rawIdentifier = document.getElementById('login-identifier').value.trim();
-            const identifier = rawIdentifier.toLowerCase().replace(/[.#$\[\]]/g, "_");
+            const inputVal = document.getElementById('login-identifier').value.trim();
+            const cleanInput = cleanKey(inputVal);
             const password = document.getElementById('login-password').value;
 
             try {
-                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + identifier));
+                // Fetch all users to safely check matching identifiers or cleaned keys
+                const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users'));
+                
                 if (!snapshot.exists()) {
                     showToast(i18n[currentLang].toastWrongLogin, true);
                     return;
                 }
 
-                const userData = snapshot.val();
-                if (userData.password !== password) {
+                const users = snapshot.val();
+                let matchedUser = null;
+
+                for (let key in users) {
+                    const u = users[key];
+                    if (
+                        key === cleanInput || 
+                        cleanKey(u.identifier || '') === cleanInput || 
+                        cleanKey(u.rawIdentifier || '') === cleanInput ||
+                        (u.rawIdentifier && u.rawIdentifier.trim() === inputVal)
+                    ) {
+                        if (u.password === password) {
+                            matchedUser = u;
+                            break;
+                        }
+                    }
+                }
+
+                if (!matchedUser) {
                     showToast(i18n[currentLang].toastWrongLogin, true);
                     return;
                 }
 
-                currentUser = userData;
+                currentUser = matchedUser;
                 if(!currentUser.transactions) currentUser.transactions = [];
                 if(!currentUser.incomeCategories) currentUser.incomeCategories = [...defaultIncomeCategories[currentLang]];
                 if(!currentUser.expenseCategories) currentUser.expenseCategories = [...defaultExpenseCategories[currentLang]];
@@ -1205,7 +1230,7 @@
                     tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/30 transition";
                     tr.innerHTML = `
                         <td class="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-100">${u.name || 'অজ্ঞাত'}</td>
-                        <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 font-mono">${u.identifier || '-'}</td>
+                        <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 font-mono">${u.rawIdentifier || u.identifier || '-'}</td>
                         <td class="py-2.5 px-3 text-slate-500">${u.address || '-'}</td>
                         <td class="py-2.5 px-3 text-right font-bold text-sky-600 dark:text-sky-400">${txCount} টি</td>
                     `;
@@ -1320,11 +1345,11 @@
 
             document.getElementById('profile-card-image').src = avatarUrl;
             document.getElementById('profile-view-name').innerText = currentUser.name;
-            document.getElementById('profile-view-id').innerText = currentUser.identifier;
+            document.getElementById('profile-view-id').innerText = currentUser.rawIdentifier || currentUser.identifier;
             document.getElementById('profile-view-address').innerText = `${i18n[currentLang].addressLabel}: ${currentUser.address || '-'}`;
 
             document.getElementById('edit-profile-name').value = currentUser.name;
-            document.getElementById('edit-profile-identifier').value = currentUser.identifier;
+            document.getElementById('edit-profile-identifier').value = currentUser.rawIdentifier || currentUser.identifier;
             document.getElementById('edit-profile-address').value = currentUser.address || '';
 
             populateCategoryDropdown();
@@ -1577,7 +1602,7 @@
         }
 
         function renderPrintReport() {
-            document.getElementById('report-user-info').innerText = `${i18n[currentLang].userLabel} ${currentUser.name} | ${i18n[currentLang].mobileEmailLabel} ${currentUser.identifier}`;
+            document.getElementById('report-user-info').innerText = `${i18n[currentLang].userLabel} ${currentUser.name} | ${i18n[currentLang].mobileEmailLabel} ${currentUser.rawIdentifier || currentUser.identifier}`;
             const now = new Date();
             document.getElementById('report-date-time').innerText = `${i18n[currentLang].reportDateLabel} ${now.toLocaleDateString()} (${now.toLocaleTimeString()})`;
 
