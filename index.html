@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>আয়-ব্যয় ট্র্যাকার | Daily Income & Expense Tracker</title>
+    <title>আয়-ব্যয় ট্র্যাকার ও হিসাব বিবরণী</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -19,12 +19,14 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         @media print {
             body { background: white !important; color: black !important; }
-            .no-print { display: none !important; }
-            #print-modal { position: absolute !important; left: 0; top: 0; width: 100%; box-shadow: none; display: block !important; }
+            .no-print, header, nav, #toast { display: none !important; }
+            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
 </head>
@@ -33,23 +35,15 @@
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2 rounded-xl text-xs font-bold text-white shadow-lg"></div>
 
-    <!-- Top Controls -->
-    <div class="fixed top-4 right-4 z-50 flex items-center space-x-2 no-print">
-        <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
-            <i class="fa-solid fa-moon inline dark:hidden"></i>
-        </button>
-    </div>
-
-    <!-- Login / Register Screen -->
+    <!-- Auth Screen -->
     <div id="auth-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
             <div class="text-center mb-6">
                 <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center text-xl mx-auto mb-2">
                     <i class="fa-solid fa-wallet"></i>
                 </div>
-                <h1 class="text-xl font-bold">আয়-ব্যয় হিসাব</h1>
-                <p class="text-xs text-slate-500 mt-1">সহজ এবং নিরাপদ লগইন</p>
+                <h1 class="text-xl font-bold">আয়-ব্যয় ট্র্যাকার</h1>
+                <p class="text-xs text-slate-500 mt-1">আপনার হিসাব নিরাপদে রাখুন</p>
             </div>
 
             <div class="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl mb-5">
@@ -99,74 +93,179 @@
         </div>
     </div>
 
-    <!-- Main Dashboard App -->
+    <!-- Main App Screen -->
     <div id="app-screen" class="hidden flex-grow flex flex-col">
+        <!-- Header & Menu -->
         <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 px-4 py-3 shadow-sm no-print">
-            <div class="max-w-4xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-xs" id="user-initial">U</div>
-                    <span class="font-bold text-xs sm:text-sm" id="user-name-display">ব্যবহারকারী</span>
+            <div class="max-w-5xl mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchSection('dashboard')">
+                    <img id="header-avatar" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-9 h-9 rounded-full object-cover border">
+                    <div>
+                        <span class="font-bold text-xs sm:text-sm block" id="header-username">ব্যবহারকারী</span>
+                        <span class="text-[10px] text-sky-600">ড্যাশবোর্ড</span>
+                    </div>
                 </div>
+
+                <!-- Nav Buttons & Menu Toggle -->
                 <div class="flex items-center space-x-2">
-                    <button onclick="openPrintModal()" class="px-3 py-1.5 bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 font-bold rounded-xl text-xs border border-sky-200 dark:border-sky-800 flex items-center space-x-1">
-                        <i class="fa-solid fa-print"></i><span>প্রিন্ট</span>
-                    </button>
-                    <button onclick="logout()" class="px-3 py-1.5 bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-bold rounded-xl text-xs border border-rose-200 dark:border-rose-800">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
+                    <button onclick="switchSection('dashboard')" class="hidden sm:flex px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold">ড্যাশবোর্ড</button>
+                    <button onclick="switchSection('t-statement')" class="hidden sm:flex px-3 py-1.5 bg-sky-50 dark:bg-sky-950 text-sky-600 rounded-xl text-xs font-bold">টি-ছক বিবরণী</button>
+                    <button onclick="switchSection('profile')" class="hidden sm:flex px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold">প্রোফাইল</button>
+                    <button onclick="switchSection('admin')" class="hidden sm:flex px-3 py-1.5 bg-purple-50 text-purple-600 rounded-xl text-xs font-bold">এডমিন</button>
+                    <button onclick="openPrintModal()" class="px-3 py-1.5 bg-emerald-50 text-emerald-600 font-bold rounded-xl text-xs border border-emerald-200"><i class="fa-solid fa-print"></i> প্রিন্ট</button>
+                    <button onclick="toggleMobileMenu()" class="px-3 py-1.5 bg-sky-600 text-white rounded-xl text-xs font-bold"><i class="fa-solid fa-bars" id="menu-icon"></i> মেনু</button>
                 </div>
+            </div>
+
+            <!-- Mobile Dropdown Menu -->
+            <div id="mobile-menu" class="hidden max-w-5xl mx-auto mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button onclick="switchSection('dashboard'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-chart-pie mr-1 text-sky-500"></i> ড্যাশবোর্ড</button>
+                <button onclick="switchSection('t-statement'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-table-cells mr-1 text-sky-500"></i> টি-ছক বিবরণী</button>
+                <button onclick="switchSection('profile'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-user mr-1 text-sky-500"></i> প্রোফাইল</button>
+                <button onclick="switchSection('admin'); toggleMobileMenu();" class="p-2 bg-slate-100 dark:bg-slate-700 text-xs font-bold rounded-lg text-left"><i class="fa-solid fa-user-shield mr-1 text-purple-500"></i> এডমিন প্যানেল</button>
+                <button onclick="logout()" class="p-2 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg text-left col-span-2"><i class="fa-solid fa-right-from-bracket mr-1"></i> লগআউট</button>
             </div>
         </header>
 
-        <main class="max-w-4xl w-full mx-auto p-4 space-y-4 flex-grow">
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-3 gap-2 sm:gap-4 text-center">
-                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <span class="text-[10px] text-emerald-600 font-bold block">মোট আয়</span>
-                    <h3 class="text-sm sm:text-lg font-bold text-emerald-700 mt-1" id="total-income">৳ ০.০০</h3>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <span class="text-[10px] text-rose-600 font-bold block">মোট ব্যয়</span>
-                    <h3 class="text-sm sm:text-lg font-bold text-rose-700 mt-1" id="total-expense">৳ ০.০০</h3>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <span class="text-[10px] text-sky-600 font-bold block">ব্যালেন্স</span>
-                    <h3 class="text-sm sm:text-lg font-bold text-sky-700 mt-1" id="net-balance">৳ ০.০০</h3>
-                </div>
-            </div>
+        <main class="max-w-5xl w-full mx-auto p-4 space-y-6 flex-grow">
 
-            <!-- Add Form -->
-            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm no-print">
-                <h2 class="font-bold text-xs mb-3 text-sky-600">নতুন হিসাব যোগ করুন</h2>
-                <form onsubmit="addTransaction(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                    <select id="tx-type" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-bold">
-                        <option value="income">আয় (+)</option>
-                        <option value="expense">ব্যয় (-)</option>
-                    </select>
-                    <input type="date" id="tx-date" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
-                    <input type="text" id="tx-cat" required placeholder="খাত (যেমন: বাজার)" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
-                    <input type="number" step="0.01" id="tx-amount" required placeholder="টাকা" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-xs">
-                    <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-xs py-2 shadow">যুক্ত করুন</button>
-                </form>
-            </div>
-
-            <!-- Transactions List -->
-            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <h2 class="font-bold text-xs mb-3">লেনদেনের তালিকা</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
-                                <th class="py-2 px-2">তারিখ</th>
-                                <th class="py-2 px-2">খাত</th>
-                                <th class="py-2 px-2 text-right">পরিমাণ</th>
-                                <th class="py-2 px-2 text-center no-print">মুছুন</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tx-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody>
-                    </table>
+            <!-- 1. DASHBOARD SECTION -->
+            <section id="sec-dashboard" class="space-y-6">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-sm">
+                        <span class="text-[11px] text-emerald-600 font-bold block">মোট আয়</span>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-emerald-700 mt-1" id="dash-income">৳ ০.০০</h3>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-sm">
+                        <span class="text-[11px] text-rose-600 font-bold block">মোট ব্যয়</span>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-rose-700 mt-1" id="dash-expense">৳ ০.০০</h3>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-sm">
+                        <span class="text-[11px] text-sky-600 font-bold block">অবশিষ্ট জের</span>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-sky-700 mt-1" id="dash-balance">৳ ০.০০</h3>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Pie Charts Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm flex flex-col items-center">
+                        <h3 class="text-xs font-bold mb-3 text-emerald-600">আয়ের খাতভিত্তিক পাই চার্ট</h3>
+                        <div class="w-48 h-48"><canvas id="incomeChart"></canvas></div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm flex flex-col items-center">
+                        <h3 class="text-xs font-bold mb-3 text-rose-600">ব্যয়ের খাতভিত্তিক পাই চার্ট</h3>
+                        <div class="w-48 h-48"><canvas id="expenseChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Add Transaction Form -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm">
+                    <h2 class="font-bold text-xs mb-3 text-sky-600">নতুন হিসাব যোগ করুন</h2>
+                    <form onsubmit="addTransaction(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                        <select id="tx-type" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold">
+                            <option value="income">আয় (+)</option>
+                            <option value="expense">ব্যয় (-)</option>
+                        </select>
+                        <input type="date" id="tx-date" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        <input type="text" id="tx-cat" required placeholder="খাত (যেমন: বেতন/বাজার)" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        <input type="number" step="0.01" id="tx-amount" required placeholder="টাকার পরিমাণ" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs py-2 shadow">যুক্ত করুন</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 2. T-STATEMENT SECTION (টি-ছক বিবরণী) -->
+            <section id="sec-t-statement" class="space-y-4 hidden">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h2 class="font-bold text-sm text-sky-600">টি-ছক হিসাব বিবরণী (T-Format Statement)</h2>
+                        <button onclick="openPrintModal()" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-bold rounded-lg"><i class="fa-solid fa-print"></i> প্রিন্ট বিবরণী</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden">
+                        <!-- Left Side: Income (Debit / প্রাপ্তি) -->
+                        <div class="border-r border-slate-300 dark:border-slate-700 p-4">
+                            <h3 class="text-center font-bold text-emerald-600 border-b pb-2 mb-2">প্রাপ্তি / আয় (Income)</h3>
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="text-slate-400 border-b">
+                                        <th class="py-1 text-left">তারিখ ও খাত</th>
+                                        <th class="py-1 text-right">টাকা</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="t-income-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Right Side: Expense (Credit / প্রদান) -->
+                        <div class="p-4">
+                            <h3 class="text-center font-bold text-rose-600 border-b pb-2 mb-2">প্রদান / ব্যয় (Expense)</h3>
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="text-slate-400 border-b">
+                                        <th class="py-1 text-left">তারিখ ও খাত</th>
+                                        <th class="py-1 text-right">টাকা</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="t-expense-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. PROFILE SECTION -->
+            <section id="sec-profile" class="space-y-4 hidden">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-xl mx-auto space-y-5">
+                    <div class="flex items-center space-x-4 border-b pb-4">
+                        <img id="profile-avatar-img" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-16 h-16 rounded-full object-cover border-2 border-sky-500">
+                        <div>
+                            <h2 class="text-lg font-bold" id="profile-name-view">নাম</h2>
+                            <p class="text-xs text-slate-500" id="profile-id-view">নম্বর</p>
+                        </div>
+                    </div>
+
+                    <form onsubmit="updateProfile(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">নাম পরিবর্তন</label>
+                            <input type="text" id="profile-name-input" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">ঠিকানা</label>
+                            <input type="text" id="profile-address-input" placeholder="আপনার ঠিকানা" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">প্রোফাইল ছবি (লিংক)</label>
+                            <input type="text" id="profile-pic-input" placeholder="Image URL বা রেখে দিন" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-sky-600 text-white font-bold rounded-xl text-xs">সংরক্ষণ করুন</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 4. ADMIN SECTION -->
+            <section id="sec-admin" class="space-y-4 hidden">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h2 class="font-bold text-sm text-purple-600"><i class="fa-solid fa-user-shield mr-1"></i> এডমিন প্যানেল</h2>
+                        <span class="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-bold" id="admin-user-count">মোট ব্যবহারকারী: ১</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 border-b">
+                                    <th class="p-2.5">নাম</th>
+                                    <th class="p-2.5">মোবাইল/আইডি</th>
+                                    <th class="p-2.5 text-right">মোট এন্ট্রি</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -174,24 +273,23 @@
     <div id="print-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3 no-print">
-                <h3 class="font-bold text-sm">হিসাব রিপোর্ট</h3>
+                <h3 class="font-bold text-sm">হিসাব রিপোর্ট প্রিন্ট প্রিভিউ</h3>
                 <button onclick="closePrintModal()" class="text-slate-500 font-bold px-2 py-1 bg-slate-100 rounded">✕</button>
             </div>
-            <div class="text-center">
-                <h2 class="text-lg font-bold">দৈনন্দিন আয়-ব্যয় হিসাব রিপোর্ট</h2>
+            <div class="text-center border-b pb-3">
+                <h2 class="text-lg font-bold">দৈনন্দিন আয়-ব্যয় টি-ছক বিবরণী</h2>
                 <p class="text-xs text-slate-500" id="print-user-info"></p>
             </div>
-            <table class="w-full text-left text-xs border border-slate-300">
-                <thead>
-                    <tr class="bg-slate-100 font-bold">
-                        <th class="border border-slate-300 p-2">তারিখ</th>
-                        <th class="border border-slate-300 p-2">ধরন</th>
-                        <th class="border border-slate-300 p-2">খাত</th>
-                        <th class="border border-slate-300 p-2 text-right">টাকা</th>
-                    </tr>
-                </thead>
-                <tbody id="print-tbody"></tbody>
-            </table>
+            <div class="grid grid-cols-2 gap-4 border border-slate-300 p-2 text-xs">
+                <div>
+                    <h4 class="font-bold text-emerald-700 border-b pb-1 mb-1">প্রাপ্তি / আয়</h4>
+                    <table class="w-full" id="print-income-table"></table>
+                </div>
+                <div class="border-l border-slate-300 pl-2">
+                    <h4 class="font-bold text-rose-700 border-b pb-1 mb-1">প্রদান / ব্যয়</h4>
+                    <table class="w-full" id="print-expense-table"></table>
+                </div>
+            </div>
             <div class="flex justify-end space-x-2 no-print pt-2">
                 <button onclick="closePrintModal()" class="px-4 py-2 bg-slate-200 text-xs rounded-xl font-bold">বন্ধ করুন</button>
                 <button onclick="window.print()" class="px-4 py-2 bg-sky-600 text-white text-xs rounded-xl font-bold">প্রিন্ট করুন</button>
@@ -202,6 +300,7 @@
     <script>
         let dbUsers = JSON.parse(localStorage.getItem('simple_users') || '{}');
         let currentUserKey = localStorage.getItem('simple_current_user') || null;
+        let incomeChart = null, expenseChart = null;
 
         function showToast(msg, isErr = false) {
             const t = document.getElementById('toast');
@@ -237,6 +336,18 @@
             }
         }
 
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function switchSection(secId) {
+            ['dashboard', 't-statement', 'profile', 'admin'].forEach(s => {
+                document.getElementById('sec-' + s).classList.add('hidden');
+            });
+            document.getElementById('sec-' + secId).classList.remove('hidden');
+            if (secId === 'admin') renderAdmin();
+        }
+
         function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value.trim();
@@ -248,7 +359,7 @@
                 return;
             }
 
-            dbUsers[id] = { name, pass, txs: [] };
+            dbUsers[id] = { name, pass, address: '', avatar: '', txs: [] };
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast('অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!');
             switchTab('login');
@@ -260,7 +371,7 @@
             const pass = document.getElementById('login-pass').value;
 
             if (!dbUsers[id] || dbUsers[id].pass !== pass) {
-                showToast(' ভুল নম্বর অথবা পাসওয়ার্ড!', true);
+                showToast('ভুল নম্বর অথবা পাসওয়ার্ড!', true);
                 return;
             }
 
@@ -283,8 +394,15 @@
             document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
 
             const user = dbUsers[currentUserKey];
-            document.getElementById('user-name-display').innerText = user.name;
-            document.getElementById('user-initial').innerText = user.name.charAt(0);
+            document.getElementById('header-username').innerText = user.name;
+            if(user.avatar) document.getElementById('header-avatar').src = user.avatar;
+            
+            document.getElementById('profile-name-view').innerText = user.name;
+            document.getElementById('profile-id-view').innerText = currentUserKey;
+            document.getElementById('profile-name-input').value = user.name;
+            document.getElementById('profile-address-input').value = user.address || '';
+            document.getElementById('profile-pic-input').value = user.avatar || '';
+
             renderData();
         }
 
@@ -296,6 +414,7 @@
             const amount = parseFloat(document.getElementById('tx-amount').value);
 
             const user = dbUsers[currentUserKey];
+            if(!user.txs) user.txs = [];
             user.txs.unshift({ id: Date.now(), type, date, cat, amount });
 
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
@@ -305,64 +424,104 @@
             renderData();
         }
 
-        function deleteTx(id) {
+        function updateProfile(e) {
+            e.preventDefault();
             const user = dbUsers[currentUserKey];
-            user.txs = user.txs.filter(t => t.id !== id);
+            user.name = document.getElementById('profile-name-input').value.trim();
+            user.address = document.getElementById('profile-address-input').value.trim();
+            user.avatar = document.getElementById('profile-pic-input').value.trim();
+
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
-            showToast('হিসাব মুছে ফেলা হয়েছে!');
-            renderData();
+            showToast('প্রোফাইল আপডেট করা হয়েছে!');
+            initApp();
         }
 
         function renderData() {
             const user = dbUsers[currentUserKey];
             let income = 0, expense = 0;
-            const tbody = document.getElementById('tx-tbody');
+            const incMap = {}, expMap = {};
+            const incTBody = document.getElementById('t-income-tbody');
+            const expTBody = document.getElementById('t-expense-tbody');
+            incTBody.innerHTML = ''; expTBody.innerHTML = '';
+
+            (user.txs || []).forEach(t => {
+                if (t.type === 'income') {
+                    income += t.amount;
+                    incMap[t.cat] = (incMap[t.cat] || 0) + t.amount;
+                    incTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b></td><td class="py-1 text-right font-bold text-emerald-600">৳${t.amount.toFixed(2)}</td></tr>`;
+                } else {
+                    expense += t.amount;
+                    expMap[t.cat] = (expMap[t.cat] || 0) + t.amount;
+                    expTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b></td><td class="py-1 text-right font-bold text-rose-600">৳${t.amount.toFixed(2)}</td></tr>`;
+                }
+            });
+
+            document.getElementById('dash-income').innerText = `৳ ${income.toFixed(2)}`;
+            document.getElementById('dash-expense').innerText = `৳ ${expense.toFixed(2)}`;
+            document.getElementById('dash-balance').innerText = `৳ ${(income - expense).toFixed(2)}`;
+
+            renderCharts(incMap, expMap);
+        }
+
+        function renderCharts(incMap, expMap) {
+            if (incomeChart) incomeChart.destroy();
+            if (expenseChart) expenseChart.destroy();
+
+            const colors = ['#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'];
+
+            incomeChart = new Chart(document.getElementById('incomeChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(incMap).length ? Object.keys(incMap) : ['তথ্য নেই'],
+                    datasets: [{ data: Object.values(incMap).length ? Object.values(incMap) : [1], backgroundColor: colors }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            expenseChart = new Chart(document.getElementById('expenseChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(expMap).length ? Object.keys(expMap) : ['তথ্য নেই'],
+                    datasets: [{ data: Object.values(expMap).length ? Object.values(expMap) : [1], backgroundColor: colors }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function renderAdmin() {
+            const tbody = document.getElementById('admin-users-tbody');
             tbody.innerHTML = '';
+            const keys = Object.keys(dbUsers);
+            document.getElementById('admin-user-count').innerText = `মোট ব্যবহারকারী: ${keys.length}`;
 
-            if (!user.txs || user.txs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400">কোনো তথ্য নেই</td></tr>`;
-            } else {
-                user.txs.forEach(t => {
-                    if (t.type === 'income') income += t.amount;
-                    else expense += t.amount;
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/30";
-                    tr.innerHTML = `
-                        <td class="py-2 px-2 text-slate-500">${t.date}</td>
-                        <td class="py-2 px-2 font-bold">${t.cat}</td>
-                        <td class="py-2 px-2 text-right font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">${t.type === 'income' ? '+' : '-'} ৳${t.amount.toFixed(2)}</td>
-                        <td class="py-2 px-2 text-center no-print"><button onclick="deleteTx(${t.id})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash"></i></button></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            document.getElementById('total-income').innerText = `৳ ${income.toFixed(2)}`;
-            document.getElementById('total-expense').innerText = `৳ ${expense.toFixed(2)}`;
-            document.getElementById('net-balance').innerText = `৳ ${(income - expense).toFixed(2)}`;
+            keys.forEach(k => {
+                const u = dbUsers[k];
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2.5 font-bold">${u.name}</td>
+                        <td class="p-2.5 text-slate-500">${k}</td>
+                        <td class="p-2.5 text-right font-bold text-purple-600">${u.txs ? u.txs.length : 0} টি</td>
+                    </tr>
+                `;
+            });
         }
 
         function openPrintModal() {
             const user = dbUsers[currentUserKey];
-            document.getElementById('print-user-info').innerText = `ব্যবহারকারী: ${user.name}`;
-            const pTbody = document.getElementById('print-tbody');
-            pTbody.innerHTML = '';
+            document.getElementById('print-user-info').innerText = `ব্যবহারকারী: ${user.name} (${currentUserKey})`;
+            
+            const incTable = document.getElementById('print-income-table');
+            const expTable = document.getElementById('print-expense-table');
+            incTable.innerHTML = ''; expTable.innerHTML = '';
 
-            if (!user.txs || user.txs.length === 0) {
-                pTbody.innerHTML = `<tr><td colspan="4" class="p-2 text-center">কোনো তথ্য নেই</td></tr>`;
-            } else {
-                user.txs.forEach(t => {
-                    pTbody.innerHTML += `
-                        <tr>
-                            <td class="border border-slate-300 p-2">${t.date}</td>
-                            <td class="border border-slate-300 p-2 font-bold ${t.type === 'income' ? 'text-emerald-700' : 'text-rose-700'}">${t.type === 'income' ? 'আয়' : 'ব্যয়'}</td>
-                            <td class="border border-slate-300 p-2">${t.cat}</td>
-                            <td class="border border-slate-300 p-2 text-right font-bold">৳${t.amount.toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-            }
+            (user.txs || []).forEach(t => {
+                if (t.type === 'income') {
+                    incTable.innerHTML += `<tr><td>${t.date} - ${t.cat}</td><td class="text-right font-bold">৳${t.amount.toFixed(2)}</td></tr>`;
+                } else {
+                    expTable.innerHTML += `<tr><td>${t.date} - ${t.cat}</td><td class="text-right font-bold">৳${t.amount.toFixed(2)}</td></tr>`;
+                }
+            });
+
             document.getElementById('print-modal').classList.remove('hidden');
         }
 
@@ -370,19 +529,7 @@
             document.getElementById('print-modal').classList.add('hidden');
         }
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
         window.onload = function() {
-            if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             if (currentUserKey && dbUsers[currentUserKey]) {
                 initApp();
             }
