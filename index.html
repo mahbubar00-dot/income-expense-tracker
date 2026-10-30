@@ -282,20 +282,26 @@
                 </div>
             </section>
 
-            <!-- 4. PROFILE SECTION (With Password Change & Avatar Upload) -->
+            <!-- 4. PROFILE SECTION -->
             <section id="sec-profile" class="space-y-4 hidden">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-xl mx-auto space-y-6">
-                    <div class="flex items-center space-x-4 border-b pb-4">
-                        <img id="profile-avatar-img" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-16 h-16 rounded-full object-cover border-2 border-sky-500 shadow">
+                    <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border-b pb-4 text-center sm:text-left">
+                        <div class="flex flex-col items-center">
+                            <img id="profile-avatar-img" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-20 h-20 rounded-full object-cover border-2 border-sky-500 shadow">
+                            <label for="profile-file-input" class="mt-2 text-[11px] font-bold text-sky-600 hover:underline cursor-pointer">
+                                <i class="fa-solid fa-camera mr-1"></i> <span data-i18n="changePicLabel">ছবি পরিবর্তন করুন</span>
+                            </label>
+                            <input type="file" id="profile-file-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                        </div>
                         <div>
                             <h2 class="text-lg font-bold" id="profile-name-view">নাম</h2>
                             <p class="text-xs text-slate-500" id="profile-id-view">নম্বর</p>
                         </div>
                     </div>
 
-                    <!-- Profile Info & Avatar Update Form -->
+                    <!-- Profile Info Update Form -->
                     <form onsubmit="updateProfile(event)" class="space-y-4">
-                        <h3 class="font-bold text-xs text-sky-600 uppercase tracking-wider" data-i18n="profInfoHeading">ব্যক্তিগত তথ্য ও ছবি</h3>
+                        <h3 class="font-bold text-xs text-sky-600 uppercase tracking-wider" data-i18n="profInfoHeading">ব্যক্তিগত তথ্য</h3>
                         <div>
                             <label class="block text-xs font-bold mb-1" data-i18n="profNameChange">নাম পরিবর্তন</label>
                             <input type="text" id="profile-name-input" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
@@ -303,10 +309,6 @@
                         <div>
                             <label class="block text-xs font-bold mb-1" data-i18n="profAddress">ঠিকানা</label>
                             <input type="text" id="profile-address-input" data-i18n-ph="addressPh" placeholder="আপনার ঠিকানা" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold mb-1" data-i18n="profPicFile">প্রোফাইল ছবি আপলোড করুন</label>
-                            <input type="file" id="profile-file-input" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
                         </div>
                         <button type="submit" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs shadow" data-i18n="saveBtn">তথ্য সংরক্ষণ করুন</button>
                     </form>
@@ -447,11 +449,11 @@
                 addCatBtn: "খাত যুক্ত করুন",
                 incCatListTitle: "আয়ের খাতসমূহ",
                 expCatListTitle: "ব্যয়ের খাতসমূহ",
-                profInfoHeading: "ব্যক্তিগত তথ্য ও ছবি",
+                profInfoHeading: "ব্যক্তিগত তথ্য",
                 profNameChange: "নাম পরিবর্তন",
                 profAddress: "ঠিকানা",
                 addressPh: "আপনার ঠিকানা",
-                profPicFile: "প্রোফাইল ছবি আপলোড করুন",
+                changePicLabel: "ছবি পরিবর্তন করুন",
                 saveBtn: "তথ্য সংরক্ষণ করুন",
                 passChangeHeading: "পাসওয়ার্ড পরিবর্তন করুন",
                 oldPassLabel: "বর্তমান পাসওয়ার্ড",
@@ -525,11 +527,11 @@
                 addCatBtn: "Add Category",
                 incCatListTitle: "Income Categories",
                 expCatListTitle: "Expense Categories",
-                profInfoHeading: "Personal Info & Avatar",
+                profInfoHeading: "Personal Info",
                 profNameChange: "Change Name",
                 profAddress: "Address",
                 addressPh: "Your address",
-                profPicFile: "Upload Profile Picture",
+                changePicLabel: "Change Picture",
                 saveBtn: "Save Information",
                 passChangeHeading: "Change Password",
                 oldPassLabel: "Current Password",
@@ -712,6 +714,13 @@
             reader.onload = function(uploadEvent) {
                 tempAvatarBase64 = uploadEvent.target.result;
                 document.getElementById('profile-avatar-img').src = tempAvatarBase64;
+                
+                // Automatically save avatar immediately on selection
+                const user = dbUsers[currentUserKey];
+                user.avatar = tempAvatarBase64;
+                localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+                document.getElementById('header-avatar').src = tempAvatarBase64;
+                showToast(currentLang === 'bn' ? 'প্রোফাইল ছবি সফলভাবে আপডেট হয়েছে!' : 'Profile picture updated successfully!');
             };
             reader.readAsDataURL(file);
         }
