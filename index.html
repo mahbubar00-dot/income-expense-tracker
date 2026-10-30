@@ -174,7 +174,7 @@
                     </div>
                 </div>
 
-                <!-- Add Transaction Form (Select Category) -->
+                <!-- Add Transaction Form -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="font-bold text-xs text-sky-600" data-i18n="addTxTitle">নতুন হিসাব যোগ করুন</h2>
@@ -186,15 +186,13 @@
                             <option value="expense" data-i18n="optExp">ব্যয় (-)</option>
                         </select>
                         <input type="date" id="tx-date" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
-                        <select id="tx-cat" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold">
-                            <!-- Populated dynamically -->
-                        </select>
+                        <select id="tx-cat" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold"></select>
                         <input type="number" step="0.01" id="tx-amount" required data-i18n-ph="amountPh" placeholder="টাকার পরিমাণ" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
                         <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs py-2 shadow" data-i18n="addBtn">যুক্ত করুন</button>
                     </form>
                 </div>
 
-                <!-- Recent Transactions List with Delete Option -->
+                <!-- Recent Transactions -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm space-y-3">
                     <div class="flex justify-between items-center border-b pb-2">
                         <h2 class="font-bold text-xs text-slate-700 dark:text-slate-200" data-i18n="recentTitle">সাম্প্রতিক আয়-ব্যয়ের বিবরণী</h2>
@@ -217,7 +215,7 @@
                 </div>
             </section>
 
-            <!-- 2. T-STATEMENT SECTION (টি-ছক বিবরণী) -->
+            <!-- 2. T-STATEMENT SECTION -->
             <section id="sec-t-statement" class="space-y-4 hidden">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm space-y-4">
                     <div class="flex justify-between items-center border-b pb-3">
@@ -226,7 +224,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden">
-                        <!-- Left Side: Income -->
                         <div class="border-r border-slate-300 dark:border-slate-700 p-4">
                             <h3 class="text-center font-bold text-emerald-600 border-b pb-2 mb-2" data-i18n="tIncHeader">প্রাপ্তি / আয় (Income)</h3>
                             <table class="w-full text-xs">
@@ -239,8 +236,6 @@
                                 <tbody id="t-income-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
                             </table>
                         </div>
-
-                        <!-- Right Side: Expense -->
                         <div class="p-4">
                             <h3 class="text-center font-bold text-rose-600 border-b pb-2 mb-2" data-i18n="tExpHeader">প্রদান / ব্যয় (Expense)</h3>
                             <table class="w-full text-xs">
@@ -257,7 +252,7 @@
                 </div>
             </section>
 
-            <!-- 3. CATEGORIES MANAGEMENT SECTION (খাত ম্যানেজমেন্ট) -->
+            <!-- 3. CATEGORIES MANAGEMENT SECTION -->
             <section id="sec-categories" class="space-y-6 hidden">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-2xl mx-auto space-y-6">
                     <div class="border-b pb-3">
@@ -265,7 +260,6 @@
                         <p class="text-xs text-slate-500 mt-0.5" data-i18n="catMgmtSub">নতুন খাত যোগ করুন অথবা আপনার প্রয়োজনমতো খাত ডিলিট করুন</p>
                     </div>
 
-                    <!-- Add Category Form -->
                     <form onsubmit="addNewCategory(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border">
                         <select id="new-cat-type" class="px-3 py-2 bg-white dark:bg-slate-800 border rounded-xl text-xs font-bold">
                             <option value="income" data-i18n="optInc">আয় খাত</option>
@@ -275,7 +269,6 @@
                         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs py-2 shadow" data-i18n="addCatBtn">খাত যুক্ত করুন</button>
                     </form>
 
-                    <!-- Categories Lists Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="border p-4 rounded-xl space-y-2">
                             <h3 class="font-bold text-xs text-emerald-600 border-b pb-1" data-i18n="incCatListTitle">আয়ের খাতসমূহ</h3>
@@ -289,18 +282,20 @@
                 </div>
             </section>
 
-            <!-- 4. PROFILE SECTION -->
+            <!-- 4. PROFILE SECTION (With Password Change & Avatar Upload) -->
             <section id="sec-profile" class="space-y-4 hidden">
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-xl mx-auto space-y-5">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-xl mx-auto space-y-6">
                     <div class="flex items-center space-x-4 border-b pb-4">
-                        <img id="profile-avatar-img" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-16 h-16 rounded-full object-cover border-2 border-sky-500">
+                        <img id="profile-avatar-img" src="https://placehold.co/100x100/0284c7/ffffff?text=U" class="w-16 h-16 rounded-full object-cover border-2 border-sky-500 shadow">
                         <div>
                             <h2 class="text-lg font-bold" id="profile-name-view">নাম</h2>
                             <p class="text-xs text-slate-500" id="profile-id-view">নম্বর</p>
                         </div>
                     </div>
 
-                    <form onsubmit="updateProfile(event)" class="space-y-3">
+                    <!-- Profile Info & Avatar Update Form -->
+                    <form onsubmit="updateProfile(event)" class="space-y-4">
+                        <h3 class="font-bold text-xs text-sky-600 uppercase tracking-wider" data-i18n="profInfoHeading">ব্যক্তিগত তথ্য ও ছবি</h3>
                         <div>
                             <label class="block text-xs font-bold mb-1" data-i18n="profNameChange">নাম পরিবর্তন</label>
                             <input type="text" id="profile-name-input" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
@@ -310,10 +305,24 @@
                             <input type="text" id="profile-address-input" data-i18n-ph="addressPh" placeholder="আপনার ঠিকানা" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold mb-1" data-i18n="profPic">প্রোফাইল ছবি (লিংক)</label>
-                            <input type="text" id="profile-pic-input" placeholder="Image URL" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
+                            <label class="block text-xs font-bold mb-1" data-i18n="profPicFile">প্রোফাইল ছবি আপলোড করুন</label>
+                            <input type="file" id="profile-file-input" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
                         </div>
-                        <button type="submit" class="w-full py-2.5 bg-sky-600 text-white font-bold rounded-xl text-xs" data-i18n="saveBtn">সংরক্ষণ করুন</button>
+                        <button type="submit" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs shadow" data-i18n="saveBtn">তথ্য সংরক্ষণ করুন</button>
+                    </form>
+
+                    <!-- Password Change Form -->
+                    <form onsubmit="changePassword(event)" class="space-y-4 border-t pt-4">
+                        <h3 class="font-bold text-xs text-rose-600 uppercase tracking-wider" data-i18n="passChangeHeading">পাসওয়ার্ড পরিবর্তন করুন</h3>
+                        <div>
+                            <label class="block text-xs font-bold mb-1" data-i18n="oldPassLabel">বর্তমান পাসওয়ার্ড</label>
+                            <input type="password" id="old-pass" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs" placeholder="••••••••">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1" data-i18n="newPassLabel">নতুন পাসওয়ার্ড</label>
+                            <input type="password" id="new-pass" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs" placeholder="কমপক্ষে ৪ সংখ্যা">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs shadow" data-i18n="passChangeBtn">পাসওয়ার্ড পরিবর্তন করুন</button>
                     </form>
                 </div>
             </section>
@@ -376,6 +385,7 @@
         let currentUserKey = localStorage.getItem('simple_current_user') || null;
         let currentLang = localStorage.getItem('simple_lang') || 'bn';
         let incomeChart = null, expenseChart = null;
+        let tempAvatarBase64 = '';
 
         const defaultIncomeCategories = [
             "বেতন / Salary", "ব্যবসা / Business", "টিউশনি / Tuition", "বোনাস / Bonus", 
@@ -437,11 +447,16 @@
                 addCatBtn: "খাত যুক্ত করুন",
                 incCatListTitle: "আয়ের খাতসমূহ",
                 expCatListTitle: "ব্যয়ের খাতসমূহ",
+                profInfoHeading: "ব্যক্তিগত তথ্য ও ছবি",
                 profNameChange: "নাম পরিবর্তন",
                 profAddress: "ঠিকানা",
                 addressPh: "আপনার ঠিকানা",
-                profPic: "প্রোফাইল ছবি (লিংক)",
-                saveBtn: "সংরক্ষণ করুন",
+                profPicFile: "প্রোফাইল ছবি আপলোড করুন",
+                saveBtn: "তথ্য সংরক্ষণ করুন",
+                passChangeHeading: "পাসওয়ার্ড পরিবর্তন করুন",
+                oldPassLabel: "বর্তমান পাসওয়ার্ড",
+                newPassLabel: "নতুন পাসওয়ার্ড",
+                passChangeBtn: "পাসওয়ার্ড পরিবর্তন করুন",
                 adminTitle: "এডমিন প্যানেল",
                 adminName: "নাম",
                 adminId: "মোবাইল/আইডি",
@@ -458,6 +473,8 @@
                 toastCatAdded: "নতুন খাত যুক্ত করা হয়েছে!",
                 toastCatDel: "খাত মুছে ফেলা হয়েছে!",
                 toastProfUpdated: "প্রোফাইল আপডেট করা হয়েছে!",
+                toastPassUpdated: "পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!",
+                toastPassErr: "বর্তমান পাসওয়ার্ড ভুল রয়েছে!",
                 noData: "কোনো তথ্য নেই"
             },
             en: {
@@ -508,11 +525,16 @@
                 addCatBtn: "Add Category",
                 incCatListTitle: "Income Categories",
                 expCatListTitle: "Expense Categories",
+                profInfoHeading: "Personal Info & Avatar",
                 profNameChange: "Change Name",
                 profAddress: "Address",
                 addressPh: "Your address",
-                profPic: "Profile Picture (URL)",
-                saveBtn: "Save Changes",
+                profPicFile: "Upload Profile Picture",
+                saveBtn: "Save Information",
+                passChangeHeading: "Change Password",
+                oldPassLabel: "Current Password",
+                newPassLabel: "New Password",
+                passChangeBtn: "Update Password",
                 adminTitle: "Admin Panel",
                 adminName: "Name",
                 adminId: "Mobile/ID",
@@ -529,6 +551,8 @@
                 toastCatAdded: "New category added!",
                 toastCatDel: "Category deleted!",
                 toastProfUpdated: "Profile updated successfully!",
+                toastPassUpdated: "Password updated successfully!",
+                toastPassErr: "Current password is incorrect!",
                 noData: "No data available"
             }
         };
@@ -643,7 +667,6 @@
             currentUserKey = id;
             localStorage.setItem('simple_current_user', id);
             
-            // Backward compatibility for existing users without categories
             if (!dbUsers[currentUserKey].incomeCats) {
                 dbUsers[currentUserKey].incomeCats = [...defaultIncomeCategories];
                 dbUsers[currentUserKey].expenseCats = [...defaultExpenseCategories];
@@ -668,16 +691,64 @@
 
             const user = dbUsers[currentUserKey];
             document.getElementById('header-username').innerText = user.name;
-            if(user.avatar) document.getElementById('header-avatar').src = user.avatar;
+            const avatarSrc = user.avatar || `https://placehold.co/100x100/0284c7/ffffff?text=${encodeURIComponent(user.name.charAt(0))}`;
+            document.getElementById('header-avatar').src = avatarSrc;
+            document.getElementById('profile-avatar-img').src = avatarSrc;
+            tempAvatarBase64 = user.avatar || '';
             
             document.getElementById('profile-name-view').innerText = user.name;
             document.getElementById('profile-id-view').innerText = currentUserKey;
             document.getElementById('profile-name-input').value = user.name;
             document.getElementById('profile-address-input').value = user.address || '';
-            document.getElementById('profile-pic-input').value = user.avatar || '';
 
             updateCategoryDropdown();
             renderData();
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(uploadEvent) {
+                tempAvatarBase64 = uploadEvent.target.result;
+                document.getElementById('profile-avatar-img').src = tempAvatarBase64;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateProfile(e) {
+            e.preventDefault();
+            const user = dbUsers[currentUserKey];
+            user.name = document.getElementById('profile-name-input').value.trim();
+            user.address = document.getElementById('profile-address-input').value.trim();
+            if (tempAvatarBase64) user.avatar = tempAvatarBase64;
+
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            showToast(translations[currentLang].toastProfUpdated);
+            initApp();
+        }
+
+        function changePassword(e) {
+            e.preventDefault();
+            const oldPass = document.getElementById('old-pass').value;
+            const newPass = document.getElementById('new-pass').value;
+            const user = dbUsers[currentUserKey];
+
+            if (user.pass !== oldPass) {
+                showToast(translations[currentLang].toastPassErr, true);
+                return;
+            }
+
+            if (newPass.length < 4) {
+                showToast(currentLang === 'bn' ? 'পাসওয়ার্ড কমপক্ষে ৪ সংখ্যার হতে হবে!' : 'Password must be at least 4 digits!', true);
+                return;
+            }
+
+            user.pass = newPass;
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            showToast(translations[currentLang].toastPassUpdated);
+            document.getElementById('old-pass').value = '';
+            document.getElementById('new-pass').value = '';
         }
 
         function updateCategoryDropdown() {
@@ -775,18 +846,6 @@
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastTxDel);
             renderData();
-        }
-
-        function updateProfile(e) {
-            e.preventDefault();
-            const user = dbUsers[currentUserKey];
-            user.name = document.getElementById('profile-name-input').value.trim();
-            user.address = document.getElementById('profile-address-input').value.trim();
-            user.avatar = document.getElementById('profile-pic-input').value.trim();
-
-            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
-            showToast(translations[currentLang].toastProfUpdated);
-            initApp();
         }
 
         function renderData() {
