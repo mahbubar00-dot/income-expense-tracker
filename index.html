@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>আয়-ব্যয় ট্র্যাকার ও টি-ছক বিবরণী</title>
+    <title>আয়-ব্যয় ট্র্যাকার ও হিসাব বিবরণী</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -21,32 +21,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Firebase Realtime Database SDK Setup -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDd0POoFX067ZihlROIlNnSxExJdZj2bzI",
-            authDomain: "income-expense-tracker-bab65.firebaseapp.com",
-            databaseURL: "https://income-expense-tracker-bab65-default-rtdb.firebaseio.com",
-            projectId: "income-expense-tracker-bab65",
-            storageBucket: "income-expense-tracker-bab65.firebasestorage.app",
-            messagingSenderId: "179518479679",
-            appId: "1:179518479679:web:845e07cab7ac0b6682078a"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        window.db = db;
-        window.dbRef = ref;
-        window.dbSet = set;
-        window.dbGet = get;
-        window.dbChild = child;
-    </script>
-
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         @media print {
@@ -74,10 +48,10 @@
         <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
             <div class="text-center mb-6">
                 <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center text-xl mx-auto mb-2">
-                    <i class="fa-solid fa-cloud"></i>
+                    <i class="fa-solid fa-wallet"></i>
                 </div>
-                <h1 class="text-xl font-bold" data-i18n="appTitle">আজকের হিসাব - ক্লাউড আয়-ব্যয় ট্র্যাকার</h1>
-                <p class="text-xs text-slate-500 mt-1" data-i18n="appSubtitle">যেকোনো ডিভাইস থেকে নিরাপদে হিসাব রাখুন</p>
+                <h1 class="text-xl font-bold" data-i18n="appTitle">আয়-ব্যয় ট্র্যাকার</h1>
+                <p class="text-xs text-slate-500 mt-1" data-i18n="appSubtitle">আপনার হিসাব নিরাপদে রাখুন</p>
             </div>
 
             <div class="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl mb-5">
@@ -303,7 +277,7 @@
                 </div>
             </section>
 
-            <!-- PROFILE SECTION -->
+            <!-- PROFILE SECTION WITH BACKUP/RESTORE -->
             <section id="sec-profile" class="space-y-4 hidden">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border shadow-sm max-w-xl mx-auto space-y-6">
                     <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 border-b pb-4 text-center sm:text-left">
@@ -317,6 +291,19 @@
                         <div>
                             <h2 class="text-lg font-bold" id="profile-name-view">নাম</h2>
                             <p class="text-xs text-slate-500" id="profile-id-view">নম্বর</p>
+                        </div>
+                    </div>
+
+                    <!-- Backup / Restore Section for Cross-Browser Sync -->
+                    <div class="p-4 bg-sky-50 dark:bg-sky-950/40 rounded-xl border border-sky-200 dark:border-sky-800 space-y-2">
+                        <h3 class="font-bold text-xs text-sky-700 dark:text-sky-300">ডেটা ব্যাকআপ ও অন্য ব্রাউজারে স্থানান্তর</h3>
+                        <p class="text-[11px] text-slate-500">অন্য ব্রাউজার বা মোবাইলে নিতে 'ব্যাকআপ ফাইল ডাউনলোড করুন' ক্লিক করুন, এবং অন্য ব্রাউজারে গিয়ে 'ফাইল থেকে রিস্টোর করুন' সিলেক্ট করুন।</p>
+                        <div class="flex space-x-2 pt-1">
+                            <button onclick="exportData()" class="px-3 py-2 bg-sky-600 text-white text-xs font-bold rounded-lg shadow"><i class="fa-solid fa-download mr-1"></i> ব্যাকআপ ডাউনলোড</button>
+                            <label class="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg shadow cursor-pointer">
+                                <i class="fa-solid fa-upload mr-1"></i> ফাইল থেকে রিস্টোর
+                                <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+                            </label>
                         </div>
                     </div>
 
@@ -421,10 +408,11 @@
     </div>
 
     <script>
-        let currentUser = null;
+        let dbUsers = JSON.parse(localStorage.getItem('simple_users') || '{}');
         let currentUserKey = localStorage.getItem('simple_current_user') || null;
         let currentLang = localStorage.getItem('simple_lang') || 'bn';
         let incomeChart = null, expenseChart = null;
+        let tempAvatarBase64 = '';
 
         const defaultIncomeCategories = [
             "বেতন / Salary", "ব্যবসা / Business", "টিউশনি / Tuition", "বোনাস / Bonus", 
@@ -439,8 +427,8 @@
 
         const translations = {
             bn: {
-                appTitle: "আজকের হিসাব - ক্লাউড আয়-ব্যয় ট্র্যাকার",
-                appSubtitle: "যেকোনো ডিভাইস থেকে নিরাপদে হিসাব রাখুন",
+                appTitle: "আয়-ব্যয় ট্র্যাকার",
+                appSubtitle: "আপনার হিসাব নিরাপদে রাখুন",
                 login: "লগইন",
                 signup: "রেজিস্ট্রেশন",
                 idLabel: "মোবাইল নাম্বার বা ইমেইল",
@@ -517,8 +505,8 @@
                 noData: "কোনো তথ্য নেই"
             },
             en: {
-                appTitle: "Income & Expense Cloud Tracker",
-                appSubtitle: "Keep your finances secure across devices",
+                appTitle: "Income & Expense Tracker",
+                appSubtitle: "Keep your finances secure",
                 login: "Login",
                 signup: "Register",
                 idLabel: "Mobile Number or Email",
@@ -596,16 +584,43 @@
             }
         };
 
-        function cleanKey(str) {
-            return str ? str.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, "_") : "";
-        }
-
         function showToast(msg, isErr = false) {
             const t = document.getElementById('toast');
             t.innerText = msg;
             t.className = `fixed bottom-5 right-5 z-50 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-lg ${isErr ? 'bg-rose-600' : 'bg-emerald-600'}`;
             t.classList.remove('hidden');
             setTimeout(() => t.classList.add('hidden'), 2500);
+        }
+
+        // Export Data for Backup / Cross-Browser Sync
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('simple_users') || '{}');
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "income_expense_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast(currentLang === 'bn' ? 'ব্যাকআপ ফাইল সফলভাবে ডাউনলোড হয়েছে!' : 'Backup downloaded successfully!');
+        }
+
+        // Import Data to Restore on Any Browser
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const parsedData = JSON.parse(event.target.result);
+                    localStorage.setItem('simple_users', JSON.stringify(parsedData));
+                    dbUsers = parsedData;
+                    showToast(currentLang === 'bn' ? 'ডেটা সফলভাবে রিস্টোর হয়েছে!' : 'Data restored successfully!');
+                    setTimeout(() => location.reload(), 1000);
+                } catch(err) {
+                    showToast(currentLang === 'bn' ? 'ফাইলটি সঠিক নয়!' : 'Invalid backup file!', true);
+                }
+            };
+            reader.readAsText(file);
         }
 
         function toggleLanguage() {
@@ -631,7 +646,7 @@
                 if (t[key]) el.placeholder = t[key];
             });
 
-            if (currentUser) {
+            if (currentUserKey) {
                 updateCategoryDropdown();
                 renderCategoriesLists();
             }
@@ -676,80 +691,55 @@
             if (secId === 'categories') renderCategoriesLists();
         }
 
-        async function handleRegister(e) {
+        function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value.trim();
-            const rawId = document.getElementById('reg-id').value.trim();
-            const key = cleanKey(rawId);
+            const id = document.getElementById('reg-id').value.trim();
             const pass = document.getElementById('reg-pass').value;
 
-            try {
-                const snap = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + key));
-                if (snap.exists()) {
-                    showToast(currentLang === 'bn' ? 'এই নম্বর বা ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে!' : 'Account already exists!', true);
-                    return;
-                }
-
-                const newUser = {
-                    name, rawId, key, pass, address: '', avatar: '', txs: [],
-                    incomeCats: [...defaultIncomeCategories],
-                    expenseCats: [...defaultExpenseCategories]
-                };
-
-                await window.dbSet(window.dbRef(window.db, 'users/' + key), newUser);
-                currentUser = newUser;
-                currentUserKey = key;
-                localStorage.setItem('simple_current_user', key);
-                showToast(translations[currentLang].toastAccCreated);
-                switchTab('login');
-            } catch(err) {
-                showToast("সার্ভারে সংযোগ করতে সমস্যা হয়েছে!", true);
+            if (dbUsers[id]) {
+                showToast(currentLang === 'bn' ? 'এই নম্বর বা ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে!' : 'Account already exists!', true);
+                return;
             }
+
+            dbUsers[id] = { 
+                name, pass, address: '', avatar: '', txs: [],
+                incomeCats: [...defaultIncomeCategories],
+                expenseCats: [...defaultExpenseCategories]
+            };
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            showToast(translations[currentLang].toastAccCreated);
+            switchTab('login');
         }
 
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
-            const rawId = document.getElementById('login-id').value.trim();
-            const key = cleanKey(rawId);
+            const id = document.getElementById('login-id').value.trim();
             const pass = document.getElementById('login-pass').value;
 
-            try {
-                const snap = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + key));
-                if (!snap.exists() || snap.val().pass !== pass) {
-                    showToast(translations[currentLang].toastLoginErr, true);
-                    return;
-                }
-
-                currentUser = snap.val();
-                currentUserKey = key;
-                localStorage.setItem('simple_current_user', key);
-
-                if(!currentUser.incomeCats) currentUser.incomeCats = [...defaultIncomeCategories];
-                if(!currentUser.expenseCats) currentUser.expenseCats = [...defaultExpenseCategories];
-                if(!currentUser.txs) currentUser.txs = [];
-
-                showToast(translations[currentLang].toastLoginSuccess);
-                initApp();
-            } catch(err) {
-                showToast("লগইন করতে সমস্যা হয়েছে!", true);
+            if (!dbUsers[id] || dbUsers[id].pass !== pass) {
+                showToast(translations[currentLang].toastLoginErr, true);
+                return;
             }
+
+            currentUserKey = id;
+            localStorage.setItem('simple_current_user', id);
+            
+            if (!dbUsers[currentUserKey].incomeCats) {
+                dbUsers[currentUserKey].incomeCats = [...defaultIncomeCategories];
+                dbUsers[currentUserKey].expenseCats = [...defaultExpenseCategories];
+                localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+            }
+
+            showToast(translations[currentLang].toastLoginSuccess);
+            initApp();
         }
 
         function logout() {
-            currentUser = null;
             currentUserKey = null;
             localStorage.removeItem('simple_current_user');
             document.getElementById('app-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
-        }
-
-        async function saveCloudData() {
-            if (!currentUser || !currentUserKey) return;
-            try {
-                await window.dbSet(window.dbRef(window.db, 'users/' + currentUserKey), currentUser);
-            } catch(err) {
-                console.error("Cloud Save Fail", err);
-            }
         }
 
         function initApp() {
@@ -757,15 +747,17 @@
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
 
-            document.getElementById('header-username').innerText = currentUser.name;
-            const avatarSrc = currentUser.avatar || `https://placehold.co/100x100/0284c7/ffffff?text=${encodeURIComponent(currentUser.name.charAt(0))}`;
+            const user = dbUsers[currentUserKey];
+            document.getElementById('header-username').innerText = user.name;
+            const avatarSrc = user.avatar || `https://placehold.co/100x100/0284c7/ffffff?text=${encodeURIComponent(user.name.charAt(0))}`;
             document.getElementById('header-avatar').src = avatarSrc;
             document.getElementById('profile-avatar-img').src = avatarSrc;
+            tempAvatarBase64 = user.avatar || '';
             
-            document.getElementById('profile-name-view').innerText = currentUser.name;
-            document.getElementById('profile-id-view').innerText = currentUser.rawId || currentUserKey;
-            document.getElementById('profile-name-input').value = currentUser.name;
-            document.getElementById('profile-address-input').value = currentUser.address || '';
+            document.getElementById('profile-name-view').innerText = user.name;
+            document.getElementById('profile-id-view').innerText = currentUserKey;
+            document.getElementById('profile-name-input').value = user.name;
+            document.getElementById('profile-address-input').value = user.address || '';
 
             updateCategoryDropdown();
             renderData();
@@ -775,33 +767,38 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async function(uploadEvent) {
-                const base64 = uploadEvent.target.result;
-                currentUser.avatar = base64;
-                await saveCloudData();
-                document.getElementById('profile-avatar-img').src = base64;
-                document.getElementById('header-avatar').src = base64;
-                showToast(currentLang === 'bn' ? 'ছবি আপডেট করা হয়েছে!' : 'Picture updated!');
+            reader.onload = function(uploadEvent) {
+                tempAvatarBase64 = uploadEvent.target.result;
+                document.getElementById('profile-avatar-img').src = tempAvatarBase64;
+                
+                const user = dbUsers[currentUserKey];
+                user.avatar = tempAvatarBase64;
+                localStorage.setItem('simple_users', JSON.stringify(dbUsers));
+                document.getElementById('header-avatar').src = tempAvatarBase64;
+                showToast(currentLang === 'bn' ? 'প্রোফাইল ছবি সফলভাবে আপডেট হয়েছে!' : 'Profile picture updated successfully!');
             };
             reader.readAsDataURL(file);
         }
 
-        async function updateProfile(e) {
+        function updateProfile(e) {
             e.preventDefault();
-            currentUser.name = document.getElementById('profile-name-input').value.trim();
-            currentUser.address = document.getElementById('profile-address-input').value.trim();
+            const user = dbUsers[currentUserKey];
+            user.name = document.getElementById('profile-name-input').value.trim();
+            user.address = document.getElementById('profile-address-input').value.trim();
+            if (tempAvatarBase64) user.avatar = tempAvatarBase64;
 
-            await saveCloudData();
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastProfUpdated);
             initApp();
         }
 
-        async function changePassword(e) {
+        function changePassword(e) {
             e.preventDefault();
             const oldPass = document.getElementById('old-pass').value;
             const newPass = document.getElementById('new-pass').value;
+            const user = dbUsers[currentUserKey];
 
-            if (currentUser.pass !== oldPass) {
+            if (user.pass !== oldPass) {
                 showToast(translations[currentLang].toastPassErr, true);
                 return;
             }
@@ -811,8 +808,8 @@
                 return;
             }
 
-            currentUser.pass = newPass;
-            await saveCloudData();
+            user.pass = newPass;
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastPassUpdated);
             document.getElementById('old-pass').value = '';
             document.getElementById('new-pass').value = '';
@@ -822,86 +819,101 @@
             const type = document.getElementById('tx-type').value;
             const catSelect = document.getElementById('tx-cat');
             catSelect.innerHTML = '';
-            const cats = type === 'income' ? currentUser.incomeCats : currentUser.expenseCats;
+            
+            const user = dbUsers[currentUserKey];
+            const cats = type === 'income' ? user.incomeCats : user.expenseCats;
 
             cats.forEach(c => {
                 catSelect.innerHTML += `<option value="${c}">${c}</option>`;
             });
         }
 
-        async function addNewCategory(e) {
+        function addNewCategory(e) {
             e.preventDefault();
             const type = document.getElementById('new-cat-type').value;
             const name = document.getElementById('new-cat-name').value.trim();
             if (!name) return;
 
-            const list = type === 'income' ? currentUser.incomeCats : currentUser.expenseCats;
+            const user = dbUsers[currentUserKey];
+            const list = type === 'income' ? user.incomeCats : user.expenseCats;
+
             if (list.includes(name)) {
-                showToast(currentLang === 'bn' ? 'এই খাতটি ইতিমধ্যে রয়েছে!' : 'Category exists!', true);
+                showToast(currentLang === 'bn' ? 'এই খাতটি ইতিমধ্যে রয়েছে!' : 'Category already exists!', true);
                 return;
             }
 
             list.push(name);
-            await saveCloudData();
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastCatAdded);
             document.getElementById('new-cat-name').value = '';
             renderCategoriesLists();
             updateCategoryDropdown();
         }
 
-        async function deleteCategory(type, catName) {
+        function deleteCategory(type, catName) {
+            const user = dbUsers[currentUserKey];
             if (type === 'income') {
-                if (currentUser.incomeCats.length <= 1) return;
-                currentUser.incomeCats = currentUser.incomeCats.filter(c => c !== catName);
+                if (user.incomeCats.length <= 1) {
+                    showToast(currentLang === 'bn' ? 'কমপক্ষে একটি খাত থাকা আবশ্যক!' : 'At least one category required!', true);
+                    return;
+                }
+                user.incomeCats = user.incomeCats.filter(c => c !== catName);
             } else {
-                if (currentUser.expenseCats.length <= 1) return;
-                currentUser.expenseCats = currentUser.expenseCats.filter(c => c !== catName);
+                if (user.expenseCats.length <= 1) {
+                    showToast(currentLang === 'bn' ? 'কমপক্ষে একটি খাত থাকা আবশ্যক!' : 'At least one category required!', true);
+                    return;
+                }
+                user.expenseCats = user.expenseCats.filter(c => c !== catName);
             }
 
-            await saveCloudData();
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastCatDel);
             renderCategoriesLists();
             updateCategoryDropdown();
         }
 
         function renderCategoriesLists() {
+            const user = dbUsers[currentUserKey];
             const incUl = document.getElementById('income-cats-ul');
             const expUl = document.getElementById('expense-cats-ul');
             incUl.innerHTML = ''; expUl.innerHTML = '';
 
-            currentUser.incomeCats.forEach(c => {
+            user.incomeCats.forEach(c => {
                 incUl.innerHTML += `<li class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-900 border rounded-lg text-xs"><span>${c}</span> <button onclick="deleteCategory('income', '${c}')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button></li>`;
             });
 
-            currentUser.expenseCats.forEach(c => {
+            user.expenseCats.forEach(c => {
                 expUl.innerHTML += `<li class="flex justify-between items-center p-2 bg-slate-50 dark:bg-slate-900 border rounded-lg text-xs"><span>${c}</span> <button onclick="deleteCategory('expense', '${c}')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button></li>`;
             });
         }
 
-        async function addTransaction(e) {
+        function addTransaction(e) {
             e.preventDefault();
             const type = document.getElementById('tx-type').value;
             const date = document.getElementById('tx-date').value;
             const cat = document.getElementById('tx-cat').value;
             const amount = parseFloat(document.getElementById('tx-amount').value);
 
-            if(!currentUser.txs) currentUser.txs = [];
-            currentUser.txs.unshift({ id: Date.now(), type, date, cat, amount });
+            const user = dbUsers[currentUserKey];
+            if(!user.txs) user.txs = [];
+            user.txs.unshift({ id: Date.now(), type, date, cat, amount });
 
-            await saveCloudData();
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastTxAdded);
             document.getElementById('tx-amount').value = '';
             renderData();
         }
 
-        async function deleteTransaction(txId) {
-            currentUser.txs = currentUser.txs.filter(t => t.id !== txId);
-            await saveCloudData();
+        function deleteTransaction(txId) {
+            const user = dbUsers[currentUserKey];
+            user.txs = user.txs.filter(t => t.id !== txId);
+            localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastTxDel);
             renderData();
         }
 
         function renderData() {
+            const user = dbUsers[currentUserKey];
             let income = 0, expense = 0;
             const incMap = {}, expMap = {};
             const recentTBody = document.getElementById('recent-tx-tbody');
@@ -909,7 +921,7 @@
             const expTBody = document.getElementById('t-expense-tbody');
             recentTBody.innerHTML = ''; incTBody.innerHTML = ''; expTBody.innerHTML = '';
 
-            const txs = currentUser.txs || [];
+            const txs = user.txs || [];
             if (txs.length === 0) {
                 recentTBody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">${translations[currentLang].noData}</td></tr>`;
             }
@@ -971,32 +983,27 @@
             });
         }
 
-        async function renderAdmin() {
+        function renderAdmin() {
             const tbody = document.getElementById('admin-users-tbody');
-            tbody.innerHTML = '<tr><td colspan="3" class="p-3 text-center">তথ্য লোড হচ্ছে...</td></tr>';
-            try {
-                const snap = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users'));
-                if(!snap.exists()) return;
-                const users = snap.val();
-                const keys = Object.keys(users);
-                document.getElementById('admin-user-count').innerText = (currentLang === 'bn' ? 'মোট ব্যবহারকারী: ' : 'Total Users: ') + keys.length;
+            tbody.innerHTML = '';
+            const keys = Object.keys(dbUsers);
+            document.getElementById('admin-user-count').innerText = (currentLang === 'bn' ? 'মোট ব্যবহারকারী: ' : 'Total Users: ') + keys.length;
 
-                tbody.innerHTML = '';
-                keys.forEach(k => {
-                    const u = users[k];
-                    tbody.innerHTML += `
-                        <tr class="border-b">
-                            <td class="p-2.5 font-bold">${u.name}</td>
-                            <td class="p-2.5 text-slate-500">${u.rawId || k}</td>
-                            <td class="p-2.5 text-right font-bold text-purple-600">${u.txs ? u.txs.length : 0}</td>
-                        </tr>
-                    `;
-                });
-            } catch(e){}
+            keys.forEach(k => {
+                const u = dbUsers[k];
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2.5 font-bold">${u.name}</td>
+                        <td class="p-2.5 text-slate-500">${k}</td>
+                        <td class="p-2.5 text-right font-bold text-purple-600">${u.txs ? u.txs.length : 0}</td>
+                    </tr>
+                `;
+            });
         }
 
         function openPrintModal() {
-            document.getElementById('print-user-info').innerText = (currentLang === 'bn' ? 'ব্যবহারকারী: ' : 'User: ') + `${currentUser.name} (${currentUser.rawId || currentUserKey})`;
+            const user = dbUsers[currentUserKey];
+            document.getElementById('print-user-info').innerText = (currentLang === 'bn' ? 'ব্যবহারকারী: ' : 'User: ') + `${user.name} (${currentUserKey})`;
             
             const incTable = document.getElementById('print-income-table');
             const expTable = document.getElementById('print-expense-table');
@@ -1004,7 +1011,7 @@
 
             let totalInc = 0, totalExp = 0;
 
-            (currentUser.txs || []).forEach(t => {
+            (user.txs || []).forEach(t => {
                 if (t.type === 'income') {
                     totalInc += t.amount;
                     incTable.innerHTML += `<tr><td class="p-1">${t.date} - ${t.cat}</td><td class="p-1 text-right font-bold">৳${t.amount.toFixed(2)}</td></tr>`;
@@ -1014,7 +1021,6 @@
                 }
             });
 
-            // Set Print Totals
             document.getElementById('print-total-income-val').innerText = `৳ ${totalInc.toFixed(2)}`;
             document.getElementById('print-total-expense-val').innerText = `৳ ${totalExp.toFixed(2)}`;
             document.getElementById('print-net-balance-val').innerText = `৳ ${(totalInc - totalExp).toFixed(2)}`;
@@ -1026,19 +1032,10 @@
             document.getElementById('print-modal').classList.add('hidden');
         }
 
-        window.onload = async function() {
+        window.onload = function() {
             applyLanguage();
-            if (currentUserKey) {
-                try {
-                    const snap = await window.dbGet(window.dbChild(window.dbRef(window.db), 'users/' + currentUserKey));
-                    if(snap.exists()) {
-                        currentUser = snap.val();
-                        if(!currentUser.incomeCats) currentUser.incomeCats = [...defaultIncomeCategories];
-                        if(!currentUser.expenseCats) currentUser.expenseCats = [...defaultExpenseCategories];
-                        if(!currentUser.txs) currentUser.txs = [];
-                        initApp();
-                    }
-                } catch(e){}
+            if (currentUserKey && dbUsers[currentUserKey]) {
+                initApp();
             }
         }
     </script>
