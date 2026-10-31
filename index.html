@@ -23,10 +23,31 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
+        
+        /* Perfect Print Styling: Hides everything except print modal */
         @media print {
-            body { background: white !important; color: black !important; }
-            .no-print, header, nav, #toast { display: none !important; }
-            #print-modal { position: absolute !important; left: 0; top: 0; width: 100%; box-shadow: none; border: none; display: block !important; }
+            body * {
+                visibility: hidden;
+            }
+            #print-modal, #print-modal * {
+                visibility: visible;
+            }
+            #print-modal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -36,7 +57,7 @@
     <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2 rounded-xl text-xs font-bold text-white shadow-lg"></div>
 
     <!-- Auth Controls -->
-    <div id="auth-controls" class="fixed top-4 right-4 z-50 flex items-center space-x-2">
+    <div id="auth-controls" class="fixed top-4 right-4 z-50 flex items-center space-x-2 no-print">
         <button onclick="toggleLanguage()" class="px-3 py-1.5 bg-white dark:bg-slate-800 border rounded-xl text-xs font-bold shadow-sm flex items-center space-x-1">
             <i class="fa-solid fa-globe text-sky-600"></i>
             <span id="lang-btn-text">English</span>
@@ -294,7 +315,7 @@
                         </div>
                     </div>
 
-                    <!-- Backup / Restore Section for Cross-Browser Sync -->
+                    <!-- Backup / Restore Section -->
                     <div class="p-4 bg-sky-50 dark:bg-sky-950/40 rounded-xl border border-sky-200 dark:border-sky-800 space-y-2">
                         <h3 class="font-bold text-xs text-sky-700 dark:text-sky-300">ডেটা ব্যাকআপ ও অন্য ব্রাউজারে স্থানান্তর</h3>
                         <p class="text-[11px] text-slate-500">অন্য ব্রাউজার বা মোবাইলে নিতে 'ব্যাকআপ ফাইল ডাউনলোড করুন' ক্লিক করুন, এবং অন্য ব্রাউজারে গিয়ে 'ফাইল থেকে রিস্টোর করুন' সিলেক্ট করুন।</p>
@@ -592,7 +613,6 @@
             setTimeout(() => t.classList.add('hidden'), 2500);
         }
 
-        // Export Data for Backup / Cross-Browser Sync
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('simple_users') || '{}');
             const downloadAnchor = document.createElement('a');
@@ -604,7 +624,6 @@
             showToast(currentLang === 'bn' ? 'ব্যাকআপ ফাইল সফলভাবে ডাউনলোড হয়েছে!' : 'Backup downloaded successfully!');
         }
 
-        // Import Data to Restore on Any Browser
         function importData(e) {
             const file = e.target.files[0];
             if (!file) return;
