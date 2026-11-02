@@ -190,19 +190,20 @@
                     </div>
                 </div>
 
-                <!-- Add Transaction -->
+                <!-- Add Transaction Form with Description Field -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="font-bold text-xs text-sky-600" data-i18n="addTxTitle">নতুন হিসাব যোগ করুন</h2>
                         <button onclick="switchSection('categories')" class="text-[11px] text-indigo-600 font-bold hover:underline" data-i18n="addNewCatLink">+ নতুন খাত যোগ করুন</button>
                     </div>
-                    <form onsubmit="addTransaction(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                    <form onsubmit="addTransaction(event)" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                         <select id="tx-type" onchange="updateCategoryDropdown()" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold">
                             <option value="income" data-i18n="optInc">আয় (+)</option>
                             <option value="expense" data-i18n="optExp">ব্যয় (-)</option>
                         </select>
                         <input type="date" id="tx-date" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
                         <select id="tx-cat" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs font-bold"></select>
+                        <input type="text" id="tx-desc" data-i18n-ph="descPh" placeholder="বিবরণ (কী বাবদ খরচ/আয়)" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
                         <input type="number" step="0.01" id="tx-amount" required data-i18n-ph="amountPh" placeholder="টাকার পরিমাণ" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border rounded-xl text-xs">
                         <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs py-2 shadow" data-i18n="addBtn">যুক্ত করুন</button>
                     </form>
@@ -220,7 +221,7 @@
                                 <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 border-b">
                                     <th class="p-2.5" data-i18n="thDate">তারিখ</th>
                                     <th class="p-2.5" data-i18n="thType">ধরন</th>
-                                    <th class="p-2.5" data-i18n="thCat">খাত</th>
+                                    <th class="p-2.5" data-i18n="thCat">খাত ও বিবরণ</th>
                                     <th class="p-2.5 text-right" data-i18n="thAmount">টাকা</th>
                                     <th class="p-2.5 text-center" data-i18n="thAction">মুছুন</th>
                                 </tr>
@@ -245,7 +246,7 @@
                             <table class="w-full text-xs">
                                 <thead>
                                     <tr class="text-slate-400 border-b">
-                                        <th class="py-1 text-left" data-i18n="thDateCat">তারিখ ও খাত</th>
+                                        <th class="py-1 text-left" data-i18n="thDateCat">তারিখ, খাত ও বিবরণ</th>
                                         <th class="py-1 text-right" data-i18n="thAmount">টাকা</th>
                                     </tr>
                                 </thead>
@@ -257,7 +258,7 @@
                             <table class="w-full text-xs">
                                 <thead>
                                     <tr class="text-slate-400 border-b">
-                                        <th class="py-1 text-left" data-i18n="thDateCat">তারিখ ও খাত</th>
+                                        <th class="py-1 text-left" data-i18n="thDateCat">তারিখ, খাত ও বিবরণ</th>
                                         <th class="py-1 text-right" data-i18n="thAmount">টাকা</th>
                                     </tr>
                                 </thead>
@@ -475,20 +476,21 @@
                 addNewCatLink: "+ নতুন খাত যোগ করুন",
                 optInc: "আয় (+)",
                 optExp: "ব্যয় (-)",
+                descPh: "বিবরণ (কী বাবদ খরচ/আয়)",
                 amountPh: "টাকার পরিমাণ",
                 addBtn: "যুক্ত করুন",
                 recentTitle: "সাম্প্রতিক আয়-ব্যয়ের বিবরণী",
                 recentSub: "সর্বশেষ এন্ট্রিগুলো উপরে থাকবে",
                 thDate: "তারিখ",
                 thType: "ধরন",
-                thCat: "খাত",
+                thCat: "খাত ও বিবরণ",
                 thAmount: "টাকা",
                 thAction: "মুছুন",
                 tFormTitle: "টি-ছক হিসাব বিবরণী (T-Format Statement)",
                 printStmt: "প্রিন্ট বিবরণী",
                 tIncHeader: "প্রাপ্তি / আয় (Income)",
                 tExpHeader: "প্রদান / ব্যয় (Expense)",
-                thDateCat: "তারিখ ও খাত",
+                thDateCat: "তারিখ, খাত ও বিবরণ",
                 catMgmtTitle: "খাত ব্যবস্থাপনা (Category Management)",
                 catMgmtSub: "নতুন খাত যোগ করুন অথবা আপনার প্রয়োজনমতো খাত ডিলিট করুন",
                 newCatPh: "নতুন খাতের নাম",
@@ -553,20 +555,21 @@
                 addNewCatLink: "+ Add New Category",
                 optInc: "Income (+)",
                 optExp: "Expense (-)",
+                descPh: "Description (What for?)",
                 amountPh: "Amount",
                 addBtn: "Add Record",
                 recentTitle: "Recent Transactions",
                 recentSub: "Latest entries appear on top",
                 thDate: "Date",
                 thType: "Type",
-                thCat: "Category",
+                thCat: "Category & Desc",
                 thAmount: "Amount",
                 thAction: "Delete",
                 tFormTitle: "T-Format Account Statement",
                 printStmt: "Print Statement",
                 tIncHeader: "Receipts / Income",
                 tExpHeader: "Payments / Expense",
-                thDateCat: "Date & Category",
+                thDateCat: "Date, Category & Desc",
                 catMgmtTitle: "Category Management",
                 catMgmtSub: "Add new categories or delete existing ones",
                 newCatPh: "New category name",
@@ -911,14 +914,16 @@
             const type = document.getElementById('tx-type').value;
             const date = document.getElementById('tx-date').value;
             const cat = document.getElementById('tx-cat').value;
+            const desc = document.getElementById('tx-desc').value.trim();
             const amount = parseFloat(document.getElementById('tx-amount').value);
 
             const user = dbUsers[currentUserKey];
             if(!user.txs) user.txs = [];
-            user.txs.unshift({ id: Date.now(), type, date, cat, amount });
+            user.txs.unshift({ id: Date.now(), type, date, cat, desc, amount });
 
             localStorage.setItem('simple_users', JSON.stringify(dbUsers));
             showToast(translations[currentLang].toastTxAdded);
+            document.getElementById('tx-desc').value = '';
             document.getElementById('tx-amount').value = '';
             renderData();
         }
@@ -948,12 +953,13 @@
             txs.forEach(t => {
                 const typeLabel = t.type === 'income' ? (currentLang === 'bn' ? 'আয়' : 'Income') : (currentLang === 'bn' ? 'ব্যয়' : 'Expense');
                 const badgeClass = t.type === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+                const descText = t.desc ? `<br><span class="text-[11px] text-slate-400 italic">${t.desc}</span>` : '';
 
                 recentTBody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50">
                         <td class="p-2.5 text-slate-500">${t.date}</td>
                         <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${typeLabel}</span></td>
-                        <td class="p-2.5 font-bold">${t.cat}</td>
+                        <td class="p-2.5 font-bold">${t.cat}${descText}</td>
                         <td class="p-2.5 text-right font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">${t.type === 'income' ? '+' : '-'} ৳${t.amount.toFixed(2)}</td>
                         <td class="p-2.5 text-center"><button onclick="deleteTransaction(${t.id})" class="text-slate-400 hover:text-rose-500 transition"><i class="fa-solid fa-trash-can"></i></button></td>
                     </tr>
@@ -962,11 +968,11 @@
                 if (t.type === 'income') {
                     income += t.amount;
                     incMap[t.cat] = (incMap[t.cat] || 0) + t.amount;
-                    incTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b></td><td class="py-1 text-right font-bold text-emerald-600">৳${t.amount.toFixed(2)}</td></tr>`;
+                    incTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b>${t.desc ? '<br><span class="text-[10px] text-slate-400 italic">'+t.desc+'</span>' : ''}</td><td class="py-1 text-right font-bold text-emerald-600">৳${t.amount.toFixed(2)}</td></tr>`;
                 } else {
                     expense += t.amount;
                     expMap[t.cat] = (expMap[t.cat] || 0) + t.amount;
-                    expTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b></td><td class="py-1 text-right font-bold text-rose-600">৳${t.amount.toFixed(2)}</td></tr>`;
+                    expTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b>${t.desc ? '<br><span class="text-[10px] text-slate-400 italic">'+t.desc+'</span>' : ''}</td><td class="py-1 text-right font-bold text-rose-600">৳${t.amount.toFixed(2)}</td></tr>`;
                 }
             });
 
@@ -1031,12 +1037,13 @@
             let totalInc = 0, totalExp = 0;
 
             (user.txs || []).forEach(t => {
+                const descStr = t.desc ? `<br><span class="text-[10px] text-slate-500 italic">${t.desc}</span>` : '';
                 if (t.type === 'income') {
                     totalInc += t.amount;
-                    incTable.innerHTML += `<tr><td class="p-1">${t.date} - ${t.cat}</td><td class="p-1 text-right font-bold">৳${t.amount.toFixed(2)}</td></tr>`;
+                    incTable.innerHTML += `<tr><td class="p-1">${t.date} - <b>${t.cat}</b>${descStr}</td><td class="p-1 text-right font-bold align-top">৳${t.amount.toFixed(2)}</td></tr>`;
                 } else {
                     totalExp += t.amount;
-                    expTable.innerHTML += `<tr><td class="p-1">${t.date} - ${t.cat}</td><td class="p-1 text-right font-bold">৳${t.amount.toFixed(2)}</td></tr>`;
+                    expTable.innerHTML += `<tr><td class="p-1">${t.date} - <b>${t.cat}</b>${descStr}</td><td class="p-1 text-right font-bold align-top">৳${t.amount.toFixed(2)}</td></tr>`;
                 }
             });
 
