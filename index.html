@@ -24,7 +24,6 @@
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
         
-        /* Perfect Print Styling: Hides everything except print modal */
         @media print {
             body * {
                 visibility: hidden;
@@ -190,7 +189,7 @@
                     </div>
                 </div>
 
-                <!-- Add Transaction Form with Description Field -->
+                <!-- Add Transaction Form -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="font-bold text-xs text-sky-600" data-i18n="addTxTitle">নতুন হিসাব যোগ করুন</h2>
@@ -382,15 +381,22 @@
         </main>
     </div>
 
-    <!-- PRINT REPORT MODAL WITH TOTALS -->
+    <!-- PRINT REPORT MODAL WITH MONTH SELECTOR -->
     <div id="print-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3 no-print">
                 <h3 class="font-bold text-sm" data-i18n="printPreviewTitle">হিসাব রিপোর্ট প্রিন্ট প্রিভিউ</h3>
                 <button onclick="closePrintModal()" class="text-slate-500 font-bold px-2 py-1 bg-slate-100 rounded">✕</button>
             </div>
+
+            <!-- Month Selection Dropdown for Printing -->
+            <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-100 p-3 rounded-xl border no-print gap-2">
+                <label class="font-bold text-xs text-slate-700">প্রিন্ট করার জন্য মাস সিলেক্ট করুন:</label>
+                <input type="month" id="print-month-input" onchange="updatePrintPreview()" class="px-3 py-1.5 bg-white border rounded-lg text-xs font-bold">
+            </div>
+
             <div class="text-center border-b pb-3">
-                <h2 class="text-lg font-bold" data-i18n="printDocHeader">দৈনন্দিন আয়-ব্যয় টি-ছক বিবরণী</h2>
+                <h2 class="text-lg font-bold" id="print-doc-header">দৈনন্দিন আয়-ব্যয় টি-ছক বিবরণী</h2>
                 <p class="text-xs text-slate-500" id="print-user-info"></p>
             </div>
 
@@ -512,7 +518,7 @@
                 adminId: "মোবাইল/আইডি",
                 adminCount: "মোট এন্ট্রি",
                 printPreviewTitle: "হিসাব রিপোর্ট প্রিন্ট প্রিভিউ",
-                printDocHeader: "দৈনন্দিন আয়-ব্যয় টি-ছক বিবরণী",
+                printDocHeader: "মাসিক আয়-ব্যয় টি-ছক বিবরণী",
                 closeBtn: "বন্ধ করুন",
                 printNowBtn: "প্রিন্ট করুন",
                 toastAccCreated: "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!",
@@ -591,7 +597,7 @@
                 adminId: "Mobile/ID",
                 adminCount: "Total Entries",
                 printPreviewTitle: "Statement Print Preview",
-                printDocHeader: "Daily Income & Expense T-Statement",
+                printDocHeader: "Monthly Income & Expense T-Statement",
                 closeBtn: "Close",
                 printNowBtn: "Print Now",
                 toastAccCreated: "Account created successfully!",
@@ -941,9 +947,7 @@
             let income = 0, expense = 0;
             const incMap = {}, expMap = {};
             const recentTBody = document.getElementById('recent-tx-tbody');
-            const incTBody = document.getElementById('t-income-tbody');
-            const expTBody = document.getElementById('t-expense-tbody');
-            recentTBody.innerHTML = ''; incTBody.innerHTML = ''; expTBody.innerHTML = '';
+            recentTBody.innerHTML = '';
 
             const txs = user.txs || [];
             if (txs.length === 0) {
@@ -968,11 +972,9 @@
                 if (t.type === 'income') {
                     income += t.amount;
                     incMap[t.cat] = (incMap[t.cat] || 0) + t.amount;
-                    incTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b>${t.desc ? '<br><span class="text-[10px] text-slate-400 italic">'+t.desc+'</span>' : ''}</td><td class="py-1 text-right font-bold text-emerald-600">৳${t.amount.toFixed(2)}</td></tr>`;
                 } else {
                     expense += t.amount;
                     expMap[t.cat] = (expMap[t.cat] || 0) + t.amount;
-                    expTBody.innerHTML += `<tr><td class="py-1">${t.date}<br><b>${t.cat}</b>${t.desc ? '<br><span class="text-[10px] text-slate-400 italic">'+t.desc+'</span>' : ''}</td><td class="py-1 text-right font-bold text-rose-600">৳${t.amount.toFixed(2)}</td></tr>`;
                 }
             });
 
@@ -1030,6 +1032,19 @@
             const user = dbUsers[currentUserKey];
             document.getElementById('print-user-info').innerText = (currentLang === 'bn' ? 'ব্যবহারকারী: ' : 'User: ') + `${user.name} (${currentUserKey})`;
             
+            // Set current month default in month picker (YYYY-MM)
+            const today = new Date().toISOString().slice(0, 7);
+            const monthInput = document.getElementById('print-month-input');
+            if(!monthInput.value) monthInput.value = today;
+
+            updatePrintPreview();
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function updatePrintPreview() {
+            const user = dbUsers[currentUserKey];
+            const selectedMonth = document.getElementById('print-month-input').value; // e.g., "2026-11"
+            
             const incTable = document.getElementById('print-income-table');
             const expTable = document.getElementById('print-expense-table');
             incTable.innerHTML = ''; expTable.innerHTML = '';
@@ -1037,21 +1052,29 @@
             let totalInc = 0, totalExp = 0;
 
             (user.txs || []).forEach(t => {
-                const descStr = t.desc ? `<br><span class="text-[10px] text-slate-500 italic">${t.desc}</span>` : '';
-                if (t.type === 'income') {
-                    totalInc += t.amount;
-                    incTable.innerHTML += `<tr><td class="p-1">${t.date} - <b>${t.cat}</b>${descStr}</td><td class="p-1 text-right font-bold align-top">৳${t.amount.toFixed(2)}</td></tr>`;
-                } else {
-                    totalExp += t.amount;
-                    expTable.innerHTML += `<tr><td class="p-1">${t.date} - <b>${t.cat}</b>${descStr}</td><td class="p-1 text-right font-bold align-top">৳${t.amount.toFixed(2)}</td></tr>`;
+                // Check if transaction date matches selected month
+                if (selectedMonth && t.date.startsWith(selectedMonth)) {
+                    const descStr = t.desc ? `<br><span class="text-[10px] text-slate-500 italic">${t.desc}</span>` : '';
+                    if (t.type === 'income') {
+                        totalInc += t.amount;
+                        incTable.innerHTML += `<tr><td class="p-1">${t.date} - <b>${t.cat}</b>${descStr}</td><td class="p-1 text-right font-bold align-top">৳${t.amount.toFixed(2)}</td></tr>`;
+                    } else {
+                        totalExp += t.amount;
+                        expTable.innerHTML += `<tr><td class="p-1">${t.date} - <b>${t.cat}</b>${descStr}</td><td class="p-1 text-right font-bold align-top">৳${t.amount.toFixed(2)}</td></tr>`;
+                    }
                 }
             });
+
+            if(incTable.innerHTML === '') {
+                incTable.innerHTML = `<tr><td colspan="2" class="p-2 text-center text-slate-400">${translations[currentLang].noData}</td></tr>`;
+            }
+            if(expTable.innerHTML === '') {
+                expTable.innerHTML = `<tr><td colspan="2" class="p-2 text-center text-slate-400">${translations[currentLang].noData}</td></tr>`;
+            }
 
             document.getElementById('print-total-income-val').innerText = `৳ ${totalInc.toFixed(2)}`;
             document.getElementById('print-total-expense-val').innerText = `৳ ${totalExp.toFixed(2)}`;
             document.getElementById('print-net-balance-val').innerText = `৳ ${(totalInc - totalExp).toFixed(2)}`;
-
-            document.getElementById('print-modal').classList.remove('hidden');
         }
 
         function closePrintModal() {
