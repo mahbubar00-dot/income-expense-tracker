@@ -401,7 +401,7 @@
         </main>
     </div>
 
-    <!-- PRINT REPORT MODAL WITH MONTH SELECTOR -->
+    <!-- PRINT REPORT MODAL WITH DATE RANGE SELECTOR -->
     <div id="print-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3 no-print">
@@ -409,15 +409,22 @@
                 <button onclick="closePrintModal()" class="text-slate-400 hover:text-slate-600 font-bold px-2.5 py-1 bg-slate-100 rounded-lg">✕</button>
             </div>
 
-            <!-- Month Selection Dropdown for Printing -->
-            <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-3.5 rounded-2xl border border-slate-200 no-print gap-2">
-                <label class="font-bold text-xs text-slate-700">প্রিন্ট করার জন্য মাস সিলেক্ট করুন:</label>
-                <input type="month" id="print-month-input" onchange="updatePrintPreview()" class="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+            <!-- Date Range Selection for Printing (From Date - To Date) -->
+            <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-3.5 rounded-2xl border border-slate-200 no-print gap-3">
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <label class="font-bold text-xs text-slate-700 whitespace-nowrap" data-i18n="fromDateLabel">শুরুর তারিখ:</label>
+                    <input type="date" id="print-from-date" onchange="updatePrintPreview()" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                </div>
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                    <label class="font-bold text-xs text-slate-700 whitespace-nowrap" data-i18n="toDateLabel">শেষ তারিখ:</label>
+                    <input type="date" id="print-to-date" onchange="updatePrintPreview()" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold">
+                </div>
             </div>
 
             <div class="text-center border-b border-slate-100 pb-3">
-                <h2 class="text-lg font-bold text-slate-800" id="print-doc-header">মাসিক আয়-ব্যয় টি-ছক বিবরণী</h2>
-                <p class="text-xs text-slate-400 mt-0.5" id="print-user-info"></p>
+                <h2 class="text-lg font-bold text-slate-800" id="print-doc-header" data-i18n="printDocHeader">আয়-ব্যয় টি-ছক বিবরণী</h2>
+                <p class="text-xs text-sky-600 font-bold mt-0.5" id="print-date-range-text"></p>
+                <p class="text-[11px] text-slate-400 mt-0.5" id="print-user-info"></p>
             </div>
 
             <!-- T-Statement Print Table -->
@@ -541,7 +548,9 @@
                 adminId: "মোবাইল/আইডি",
                 adminCount: "মোট এন্ট্রি",
                 printPreviewTitle: "হিসাব রিপোর্ট প্রিন্ট প্রিভিউ",
-                printDocHeader: "মাসিক আয়-ব্যয় টি-ছক বিবরণী",
+                fromDateLabel: "শুরুর তারিখ:",
+                toDateLabel: "শেষ তারিখ:",
+                printDocHeader: "আয়-ব্যয় টি-ছক বিবরণী",
                 closeBtn: "বন্ধ করুন",
                 printNowBtn: "প্রিন্ট করুন",
                 toastAccCreated: "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!",
@@ -624,7 +633,9 @@
                 adminId: "Mobile/ID",
                 adminCount: "Total Entries",
                 printPreviewTitle: "Statement Print Preview",
-                printDocHeader: "Monthly Income & Expense T-Statement",
+                fromDateLabel: "From Date:",
+                toDateLabel: "To Date:",
+                printDocHeader: "Income & Expense T-Statement",
                 closeBtn: "Close",
                 printNowBtn: "Print Now",
                 toastAccCreated: "Account created successfully!",
@@ -993,13 +1004,14 @@
             let income = 0, expense = 0;
             const incMap = {}, expMap = {};
             const recentTBody = document.getElementById('recent-tx-tbody');
-            recentTBody.innerHTML = '';
+            const tIncTBody = document.getElementById('t-income-tbody');
+            const tExpTBody = document.getElementById('t-expense-tbody');
+            recentTBody.innerHTML = ''; tIncTBody.innerHTML = ''; tExpTBody.innerHTML = '';
 
             const txs = user.txs || [];
             let filteredCount = 0;
 
             txs.forEach(t => {
-                // Month & Search filter check for Dashboard
                 const matchesMonth = !selectedMonth || t.date.startsWith(selectedMonth);
                 const matchesSearch = !searchQuery || t.cat.toLowerCase().includes(searchQuery) || (t.desc && t.desc.toLowerCase().includes(searchQuery)) || t.date.includes(searchQuery);
 
@@ -1011,6 +1023,13 @@
                         expense += t.amount;
                         expMap[t.cat] = (expMap[t.cat] || 0) + t.amount;
                     }
+                }
+
+                // T-Statement list
+                if (t.type === 'income') {
+                    tIncTBody.innerHTML += `<tr><td class="py-1.5">${t.date}<br><b>${t.cat}</b>${t.desc ? '<br><span class="text-[10px] text-slate-400 italic">'+t.desc+'</span>' : ''}</td><td class="py-1.5 text-right font-bold text-emerald-600 align-top">৳${t.amount.toFixed(2)}</td></tr>`;
+                } else {
+                    tExpTBody.innerHTML += `<tr><td class="py-1.5">${t.date}<br><b>${t.cat}</b>${t.desc ? '<br><span class="text-[10px] text-slate-400 italic">'+t.desc+'</span>' : ''}</td><td class="py-1.5 text-right font-bold text-rose-600 align-top">৳${t.amount.toFixed(2)}</td></tr>`;
                 }
 
                 if (matchesSearch) {
@@ -1089,9 +1108,16 @@
             const user = dbUsers[currentUserKey];
             document.getElementById('print-user-info').innerText = (currentLang === 'bn' ? 'ব্যবহারকারী: ' : 'User: ') + `${user.name} (${currentUserKey})`;
             
-            const today = new Date().toISOString().slice(0, 7);
-            const monthInput = document.getElementById('print-month-input');
-            if(!monthInput.value) monthInput.value = today;
+            // Set default range: First day of current month to today
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const today = now.toISOString().split('T')[0];
+
+            const fromInput = document.getElementById('print-from-date');
+            const toInput = document.getElementById('print-to-date');
+
+            if (!fromInput.value) fromInput.value = firstDay;
+            if (!toInput.value) toInput.value = today;
 
             updatePrintPreview();
             document.getElementById('print-modal').classList.remove('hidden');
@@ -1099,8 +1125,21 @@
 
         function updatePrintPreview() {
             const user = dbUsers[currentUserKey];
-            const selectedMonth = document.getElementById('print-month-input').value;
-            
+            const fromDate = document.getElementById('print-from-date').value;
+            const toDate = document.getElementById('print-to-date').value;
+
+            // Update Date Range display text
+            const rangeDisplay = document.getElementById('print-date-range-text');
+            if (fromDate && toDate) {
+                rangeDisplay.innerText = currentLang === 'bn' ? `তারিখ: ${fromDate} থেকে ${toDate} পর্যন্ত` : `Period: ${fromDate} to ${toDate}`;
+            } else if (fromDate) {
+                rangeDisplay.innerText = currentLang === 'bn' ? `তারিখ: ${fromDate} থেকে` : `From: ${fromDate}`;
+            } else if (toDate) {
+                rangeDisplay.innerText = currentLang === 'bn' ? `তারিখ: ${toDate} পর্যন্ত` : `Up to: ${toDate}`;
+            } else {
+                rangeDisplay.innerText = currentLang === 'bn' ? 'সর্বমোট হিসাব বিবরণী' : 'All Time Statement';
+            }
+
             const incTable = document.getElementById('print-income-table');
             const expTable = document.getElementById('print-expense-table');
             incTable.innerHTML = ''; expTable.innerHTML = '';
@@ -1108,7 +1147,11 @@
             let totalInc = 0, totalExp = 0;
 
             (user.txs || []).forEach(t => {
-                if (selectedMonth && t.date.startsWith(selectedMonth)) {
+                // Filter transactions by From Date and To Date
+                const afterFrom = !fromDate || t.date >= fromDate;
+                const beforeTo = !toDate || t.date <= toDate;
+
+                if (afterFrom && beforeTo) {
                     const descStr = t.desc ? `<br><span class="text-[10px] text-slate-500 italic">${t.desc}</span>` : '';
                     if (t.type === 'income') {
                         totalInc += t.amount;
@@ -1120,10 +1163,10 @@
                 }
             });
 
-            if(incTable.innerHTML === '') {
+            if (incTable.innerHTML === '') {
                 incTable.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-slate-400">${translations[currentLang].noData}</td></tr>`;
             }
-            if(expTable.innerHTML === '') {
+            if (expTable.innerHTML === '') {
                 expTable.innerHTML = `<tr><td colspan="2" class="p-3 text-center text-slate-400">${translations[currentLang].noData}</td></tr>`;
             }
 
